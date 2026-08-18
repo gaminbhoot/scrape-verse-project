@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "Autonomous Self-Healing Web Scraping Engine & Visual Observability Platform for Bright Data Scraper Studio",
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --test tests/**/*.test.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
