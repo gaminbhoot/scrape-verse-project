@@ -1,15 +1,21 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, Activity, Terminal, Sparkles, RefreshCw, Cpu, Layers } from 'lucide-react';
+import { ShieldCheck, Activity, Terminal, Sparkles, RefreshCw, Cpu, Layers, Radio } from 'lucide-react';
+import { BudgetInfo } from '@/src/lib/types';
 
 interface HeaderProps {
   onRefresh: () => void;
   isRefreshing: boolean;
   onOpenDemo: () => void;
+  budget?: BudgetInfo;
 }
 
-export function Header({ onRefresh, isRefreshing, onOpenDemo }: HeaderProps) {
+export function Header({ onRefresh, isRefreshing, onOpenDemo, budget }: HeaderProps) {
+  const credits = budget?.creditsRemaining ?? 4850;
+  const proxies = budget?.activeProxies ?? 42;
+  const isLive = budget?.isLive ?? false;
+
   return (
     <header className="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-6 py-4">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -41,14 +47,23 @@ export function Header({ onRefresh, isRefreshing, onOpenDemo }: HeaderProps) {
 
         {/* Live Network Status & Actions */}
         <div className="flex flex-wrap items-center gap-3">
+          <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border ${
+            isLive
+              ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-300'
+              : 'bg-indigo-950/60 border-indigo-800/80 text-indigo-300'
+          }`}>
+            <Radio className={`w-3 h-3 ${isLive ? 'text-emerald-400 animate-pulse' : 'text-indigo-400'}`} />
+            <span>{isLive ? 'LIVE BRIGHT DATA API' : 'SIMULATION ENGINE'}</span>
+          </div>
+
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
             <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Proxy Pool: <strong className="text-emerald-400">Residential (42 Active)</strong></span>
+            <span>Proxy Pool: <strong className="text-emerald-400">Residential ({proxies} Active)</strong></span>
           </div>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
             <Layers className="w-3.5 h-3.5 text-amber-400" />
-            <span>Credits: {/* budget creditsRemaining live fetch /api/budget */} <strong className="text-amber-400">4,850{/* live via creditsRemaining fetch /api/budget */} left</strong> ($50 Bonus)</span>
+            <span>Credits: <strong className="text-amber-400">{credits.toLocaleString()} left</strong> ($50 Bonus)</span>
           </div>
 
           <button

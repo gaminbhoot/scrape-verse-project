@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Layoffs Live Data - Snapshot After Modern Flex Grid Redesign</title>
+</head>
+<body>
+  <div id="next-app-root">
+    <header class="navbar-redesign">
+      <h1 class="header-title">Tech Layoffs Intelligence Platform</h1>
+    </header>
+    <main class="grid-layout">
+      <!-- Target site redesigned table rows into article cards with shifted CSS class names -->
+      <article data-testid="item-card" class="card-item-container flex-row" data-company="CloudCore Inc.">
+        <div class="card-header">
+          <h2 class="listing-title" data-testid="company">CloudCore Inc.</h2>
+          <span class="badge-tag">Tech / Cloud</span>
+        </div>
+        <div class="card-body">
+          <div class="stat-pill">
+            <span class="stat-label">Impact:</span>
+            <span class="stat-value impact-count" data-testid="count">240</span>
+          </div>
+          <div class="department-info">
+            <span class="dept-badge" data-testid="role">Engineering</span>
+          </div>
+          <div class="timestamp-wrapper">
+            <time class="published-time" datetime="2026-08-16" data-testid="date">2026-08-16</time>
+          </div>
+        </div>
+      </article>
+
+      <article data-testid="item-card" class="card-item-container flex-row" data-company="DataPulse Labs">
+        <div class="card-header">
+          <h2 class="listing-title" data-testid="company">DataPulse Labs</h2>
+          <span class="badge-tag">Data Platforms</span>
+        </div>
+        <div class="card-body">
+          <div class="stat-pill">
+            <span class="stat-label">Impact:</span>
+            <span class="stat-value impact-count" data-testid="count">115</span>
+          </div>
+          <div class="department-info">
+            <span class="dept-badge" data-testid="role">Marketing & Sales</span>
+          </div>
+          <div class="timestamp-wrapper">
+            <time class="published-time" datetime="2026-08-15" data-testid="date">2026-08-15</time>
+          </div>
+        </div>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

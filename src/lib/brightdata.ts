@@ -14,11 +14,11 @@ export class BrightDataClient {
   private allowMock: boolean;
 
   constructor() {
-    this.apiKey = process.env.BRIGHT_DATA_API_KEY || null;
+    this.apiKey = process.env.BRIGHT_DATA_API_KEY || process.env.BRIGHTDATA_TOKEN || null;
     this.allowMock = process.env.ALLOW_MOCK_FALLBACK !== 'false';
   }
 
-  async getBudget(): Promise<{ creditsRemaining: number; monthlyTier: string; activeProxies: number }> {
+  async getBudget(): Promise<{ creditsRemaining: number; monthlyTier: string; activeProxies: number; isLive: boolean }> {
     if (this.apiKey) {
       try {
         const result = await this.runCli(['bdata', 'budget', '--format', 'json'], 10000);
@@ -31,13 +31,14 @@ export class BrightDataClient {
             creditsRemaining: Number(credits),
             monthlyTier: env.tier || 'WeMakeDevs Hackathon ($50 + 5k tier)',
             activeProxies: Number(proxies),
+            isLive: true,
           };
         }
         if (result.stderr.includes('402') || result.stderr.includes('Payment Required')) {
-          return { creditsRemaining: 0, monthlyTier: 'EXHAUSTED (402)', activeProxies: 0 };
+          return { creditsRemaining: 0, monthlyTier: 'EXHAUSTED (402)', activeProxies: 0, isLive: true };
         }
       } catch (e: any) {
-        if (e.message?.includes('402')) return { creditsRemaining: 0, monthlyTier: 'EXHAUSTED (402)', activeProxies: 0 };
+        if (e.message?.includes('402')) return { creditsRemaining: 0, monthlyTier: 'EXHAUSTED (402)', activeProxies: 0, isLive: true };
         // fall through to mock if allowed
       }
     }
@@ -46,6 +47,7 @@ export class BrightDataClient {
         creditsRemaining: 4850,
         monthlyTier: 'WeMakeDevs Hackathon Special ($50 + 5k tier) — simulation (set BRIGHT_DATA_API_KEY for live)',
         activeProxies: 42,
+        isLive: false,
       };
     }
     throw new Error('BRIGHT_DATA_API_KEY not set and ALLOW_MOCK_FALLBACK=false');

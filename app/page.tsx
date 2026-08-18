@@ -8,7 +8,7 @@ import { BreakSimulator } from '@/components/BreakSimulator';
 import { DiffViewer } from '@/components/DiffViewer';
 import { LiveTerminal } from '@/components/LiveTerminal';
 import { DataExplorer } from '@/components/DataExplorer';
-import { Scraper, MetricOverview, LogEntry, HealEvent, ScraperRun } from '@/src/lib/types';
+import { Scraper, MetricOverview, LogEntry, HealEvent, ScraperRun, BudgetInfo } from '@/src/lib/types';
 import { Sparkles, Terminal, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
@@ -22,6 +22,12 @@ export default function Home() {
     healthyCount: 3,
     brokenCount: 0,
     healingCount: 0,
+  });
+  const [budget, setBudget] = useState<BudgetInfo>({
+    creditsRemaining: 4850,
+    monthlyTier: 'WeMakeDevs Hackathon ($50 + 5k tier)',
+    activeProxies: 42,
+    isLive: false,
   });
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [healEvents, setHealEvents] = useState<HealEvent[]>([]);
@@ -40,19 +46,22 @@ export default function Home() {
   const fetchData = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const [scrapersRes, metricsRes, logsRes] = await Promise.all([
+      const [scrapersRes, metricsRes, logsRes, budgetRes] = await Promise.all([
         fetch('/api/scrapers'),
         fetch('/api/metrics'),
         fetch('/api/logs'),
+        fetch('/api/budget'),
       ]);
 
       const scrapersData = await scrapersRes.json();
       const metricsData = await metricsRes.json();
       const logsData = await logsRes.json();
+      const budgetData = await budgetRes.json();
 
       if (scrapersData.scrapers) setScrapers(scrapersData.scrapers);
       if (metricsData.metrics) setMetrics(metricsData.metrics);
       if (logsData.logs) setLogs(logsData.logs);
+      if (budgetData.budget) setBudget(budgetData.budget);
     } catch (err) {
       console.error('Error fetching dashboard telemetry:', err);
     } finally {
@@ -64,7 +73,14 @@ export default function Home() {
     fetchData();
     // Initial run for default data population
     handleRun('scraper-1');
-  }, []);
+
+    // 5-second interval polling for live background and CI/CD status sync
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const handleRun = async (id: string) => {
     try {
@@ -144,6 +160,8 @@ export default function Home() {
 
   const handleDemoStep3 = async () => {
     await handleHeal('scraper-1');
+    // Complete autonomous recovery loop: heal -> approve -> verify
+    await handleApprove('scraper-1');
     setDemoStatus('recovered');
   };
 
@@ -152,6 +170,7 @@ export default function Home() {
       <Header
         onRefresh={fetchData}
         isRefreshing={isRefreshing}
+        budget={budget}
         onOpenDemo={() => {
           const el = document.getElementById('demo-playground');
           el?.scrollIntoView({ behavior: 'smooth' });

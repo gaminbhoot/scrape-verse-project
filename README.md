@@ -123,13 +123,46 @@ npx @brightdata/cli bdata scraper heal <collector_id> "<reason for break>"
 
 ---
 
-## 📂 Project Documentation
+## 📂 Project Documentation & Compliance
 
-Detailed specifications and planning documents are available in [`docs/`](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/):
+Detailed specifications, compliance certs, and planning documents:
+- [Compliance, Zero-PII & Credit Economics](file:///Users/jay/Documents/Projects/scrape-verse-project/COMPLIANCE.md)
 - [Project Charter](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/PROJECT_CHARTER.md)
 - [Product Requirements Document (PRD)](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/PRD.md)
 - [System Architecture Specification](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/SYSTEM_ARCHITECTURE.md)
 - [Hackathon Submission & Video Strategy](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/HACKATHON_SUBMISSION_STRATEGY.md)
+
+---
+
+## 💡 Why Not Prebuilt Scrapers? (§12 Long-Tail Justification)
+
+Prebuilt scrapers in commercial marketplaces only cover the top 0.01% of standard web domains (Amazon, LinkedIn, Walmart, Instagram). Real-world intelligence requires harvesting from dynamic, long-tail data sources where no prebuilts exist:
+
+1. **Tech Layoffs & Workforce Shifts (`layoffs.fyi/live-data`)**: Macro-economic workforce movement tracker where table hierarchies frequently morph into card containers.
+2. **Open LLM Leaderboard (`huggingface.co/spaces/open-llm-leaderboard`)**: Rapidly evolving open-weights AI model benchmark scores with dynamic Gradio/Flex containers.
+3. **AI Engineering Opportunities (`news.ycombinator.com/jobs`)**: Public high-velocity hiring stream.
+
+---
+
+## 🛡️ Risk Register & Self-Healing Guardrails (§27)
+
+| Risk ID | Failure Scenario | Impact | Autonomous Mitigation & Guardrail |
+| :--- | :--- | :--- | :--- |
+| **R1** | **Target Site Transient 5xx Downtime** | Heartbeat fails | **Guardrail:** Do NOT trigger heal on 5xx; retry with exponential backoff. |
+| **R2** | **Obfuscated / Hashed Tailwind CSS Classes** | Selectors break | AI Healer synthesizes semantic tag & `data-testid` fallback selector chains. |
+| **R3** | **Full Page Redesign (Table ➔ Flex Grid)** | Zero rows extracted | Structural relative path healing with partial salvage fallback. |
+| **R4** | **Target Rate Limiting (HTTP 429)** | Scraper throttled | Residential proxy rotation + automatic backoff with jitter. |
+| **R5** | **Over-Healing on Minor Layout Jitter** | Flaky updates | `confidenceScore > 0.80` threshold required before proposed diff approval. |
+| **R6** | **Silent Schema / Type Mutation** | Bad data ingested | Zod live schema validator rejects mutated types and logs anomaly. |
+| **R7** | **Credit Exhaustion (HTTP 402)** | Collector halts | Budget API alerts dashboard and fails fast with actionable prompt. |
+
+---
+
+## 💰 Credit Economics & Free-Tier Sustainability (§22)
+
+- **Monthly Free Tier:** 5,000 credits/month (no credit card required).
+- **WeMakeDevs Hackathon Promo Code:** `wemakedevs` (Unlocks +$50 in Bright Data billing).
+- **Efficiency:** Lightweight selector heartbeat costs < 1 credit; full page scrape costs 2–5 credits. A single hackathon grant easily provides 1,000–2,500 full validation runs.
 
 ---
 

@@ -74,3 +74,11 @@ export interface LogEntry {
   message: string;
   collectorId?: string;
 }
+
+export interface BudgetInfo {
+  creditsRemaining: number;
+  monthlyTier: string;
+  activeProxies: number;
+  isLive?: boolean;
+}
+
