@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<title>ScrapeVerse — Requirements Deep Dive</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{
+    --bg:#fcfcf8; --bg-2:#f2efe6; --card:#ffffff; --ink:#141412; --muted:#6b6b60;
+    --line:#ece8da; --accent:#0f6b4b; --accent-2:#c8f135; --accent-3:#ff6b2b;
+    --teal:#0e6b6b; --amber:#b45309; --violet:#6d28d9;
+    --radius:16px; --shadow:0 8px 32px rgba(20,20,16,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11110e; --bg-2:#1a1a16; --card:#1e1e1a; --ink:#f2efe8; --muted:#a8a8a0; --line:#2a2a24;
+      --accent:#3dd68c; --accent-2:#e4ff4d; --accent-3:#ff7a45; --shadow:0 8px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{ --bg:#11110e; --bg-2:#1a1a16; --card:#1e1e1a; --ink:#f2efe8; --muted:#a8a8a0; --line:#2a2a24; --accent:#3dd68c; --accent-2:#e4ff4d; --accent-3:#ff7a45; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 "Inter", system-ui,-apple-system,Segoe UI,sans-serif; letter-spacing:-.01em}
+  a{color:var(--accent); text-decoration:none}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 20px}
+  /* hero */
+  .hero{padding:36px 0 20px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, var(--bg-2), var(--bg))}
+  .eyebrow{font:600 11px/1 "JetBrains Mono", monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%; background:var(--accent); box-shadow:0 0 0 6px rgba(15,107,75,.12); animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 6px rgba(15,107,75,.12)}50%{box-shadow:0 0 0 10px rgba(15,107,75,.06)}}
+  h1{font:800 42px/0.95 "Inter",sans-serif; letter-spacing:-.04em; margin:16px 0 12px; max-width:760px}
+  h1 span{color:var(--accent)}
+  .hero p{color:var(--muted); font-size:17px; max-width:720px; margin:0}
+  .hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:18px; margin-top:24px}
+  @media(max-width:860px){ .hero-grid{grid-template-columns:1fr} h1{font-size:32px} }
+  .kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  @media(max-width:640px){ .kpi-row{grid-template-columns:repeat(2,1fr)} }
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow)}
+  .kpi b{font:700 22px/1 "Inter"; display:block}
+  .kpi label{font:600 11px/1 "JetBrains Mono",monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+  .kpi small{color:var(--muted); font-size:12px}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font:600 12px/1 "Inter"; background:var(--accent); color:white}
+  .pill.alt{background:var(--accent-2); color:#141412}
+  .pill.muted{background:var(--bg-2); color:var(--muted); border:1px solid var(--line)}
+  /* nav */
+  .toc{display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 8px}
+  .toc a{padding:8px 12px; border-radius:999px; font:600 13px/1 "Inter"; border:1px solid var(--line); background:var(--card); color:var(--ink)}
+  .toc a:hover{border-color:var(--accent)}
+  /* sections */
+  section{margin:28px 0}
+  h2{font:800 24px/1.1 "Inter"; letter-spacing:-.03em; margin:0 0 6px; display:flex; align-items:center; gap:10px}
+  h2 .num{width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--ink); color:var(--bg); font:700 13px/1 "JetBrains Mono",monospace}
+  h3{font:700 16px/1.2 "Inter"; margin:18px 0 8px; letter-spacing:-.02em}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 16px}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media(max-width:860px){ .grid2{grid-template-columns:1fr} }
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
+  @media(max-width:900px){ .grid3{grid-template-columns:1fr} }
+  table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--card); font-size:13px}
+  th{font:700 11px/1 "JetBrains Mono",monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); text-align:left; padding:12px 14px; background:var(--bg-2); border-bottom:1px solid var(--line)}
+  td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  code, .mono{font:500 12.5px/1.4 "JetBrains Mono",monospace}
+  .codeblock{background:#0f1110; color:#e8e8e0; border-radius:12px; padding:14px 16px; overflow-x:auto; font:500 13px/1.5 "JetBrains Mono",monospace; border:1px solid #222}
+  .inline-code{background:var(--bg-2); border:1px solid var(--line); padding:2px 6px; border-radius:6px; font:500 12px "JetBrains Mono",monospace}
+  .badge{font:700 11px/1 "JetBrains Mono",monospace; letter-spacing:.06em; text-transform:uppercase; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:var(--bg-2)}
+  .badge.green{background:#dcfce7; color:#14532d; border-color:#bbf7d0}
+  .badge.amber{background:#fef3c7; color:#92400e; border-color:#fde68a}
+  .badge.red{background:#fee2e2; color:#7f1d1d; border-color:#fecaca}
+  .callout{border-left:4px solid var(--accent); background:var(--card); border-radius:0 12px 12px 0; padding:14px 16px; border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line)}
+  .callout.warn{border-left-color:var(--amber)}
+  .callout.bad{border-left-color:#dc2626}
+  .flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px; background:var(--bg-2); border:1px dashed var(--line); border-radius:12px; font:600 13px "Inter"}
+  .flow span{padding:6px 10px; background:var(--card); border:1px solid var(--line); border-radius:999px}
+  .flow .arrow{border:0; background:transparent; padding:0 2px}
+  .matrix{display:grid; grid-template-columns:120px 1fr 1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; font-size:13px}
+  .matrix > div{padding:10px 12px; background:var(--card)}
+  .matrix .head{background:var(--bg-2); font:700 11px "JetBrains Mono",monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .check{color:var(--accent)} .cross{color:#dc2626}
+  .timeline{position:relative; padding-left:22px; border-left:2px solid var(--line); margin-left:8px}
+  .timeline .node{position:relative; margin:18px 0; padding:12px 14px; background:var(--card); border:1px solid var(--line); border-radius:12px}
+  .timeline .node:before{content:""; position:absolute; left:-28px; top:16px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:3px solid var(--bg)}
+  ul.clean{margin:8px 0 0 18px; padding:0}
+  ul.clean li{margin:4px 0; color:var(--ink)}
+  ul.clean li::marker{color:var(--muted)}
+  .foot{margin:36px 0 0; padding:22px 0; border-top:1px solid var(--line); color:var(--muted); font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px}
+</style>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> WEMAKEDVS × BRIGHT DATA • AUG 17–23, 2026 • LIVE NOW <span class="pill muted" style="margin-left:8px">Analysis — before build audit</span></div>
+    <h1>ScrapeVerse <span>Requirements</span> Deep Dive</h1>
+    <p>Self-healing scrapers that <b>adapt, recover, and keep working when the web changes</b>. This report is a requirements-only reconstruction of the brief — <em>no assumptions from your repo</em>. Fan-out by 5 analysts, synthesized into one decision document.</p>
+
+    <div class="hero-grid">
+      <div class="kpi-row">
+        <div class="kpi"><label>Prize Pool</label><b>$15,000</b><small>+ $2.5k credits</small></div>
+        <div class="kpi"><label>Window</label><b>7 days</b><small>Aug 17 → 23, 2026</small></div>
+        <div class="kpi"><label>Theme Weight</label><b>Self-healing</b><small>#1 judging lever</small></div>
+        <div class="kpi"><label>Prebuilt trap</label><b>800+ sites</b><small>avoid them</small></div>
+      </div>
+      <div class="card">
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px"><span class="pill">Web-Slinger — $5k DGX Spark</span><span class="pill alt">Best Use of Bright Data</span></div>
+        <div style="font:600 13px/1.3 Inter">Judged on 4 pillars: <b>Build</b> in Studio → <b>Drive</b> from agent → <b>Heal</b> on change → <b>Build with</b> output.</div>
+        <div class="flow" style="margin-top:12px; font-size:12px">
+          <span>Scraper Studio</span><span class="arrow">→</span><span>Terminal Agent</span><span class="arrow">→</span><span>Self-Heal</span><span class="arrow">→</span><span>Collector-as-API</span>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap">
+          <span class="badge green">Suit-Up: iPad — Best UI</span>
+          <span class="badge amber">Spider-Sense: Keychron — Clean Code</span>
+          <span class="badge">Daily Bugle: Galaxy Watch</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toc">
+      <a href="#overview">0 Overview</a><a href="#mandatory">1 Mandatory Stack</a><a href="#judging">2 Judging</a><a href="#ideas">3 Ideas Ranked</a><a href="#types">4 Scraper Types</a><a href="#practices">5 Practices</a><a href="#heal">6 Self-Healing</a><a href="#checklist">7 Checklist</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 0 -->
+  <section id="overview">
+    <h2><span class="num">0</span> What this hackathon is actually testing</h2>
+    <p class="lede">Not “can you scrape”. Can you turn an unreliable long-tail site into a reliable, typed API that an agent drives — and that heals itself. Every track rewards platform advocacy.</p>
+    <div class="grid2">
+      <div class="callout">
+        <b>Winning thesis</b><br>
+        Pick a long-tail public site no one else touches (no prebuilt), build a <em>custom</em> Collector in Scraper Studio from a natural-language prompt, drive it via <span class="inline-code">POST /dca/trigger</span> from a coding agent in the terminal, deliberately break it and show <span class="inline-code">heal → approve</span>, then serve the structured JSON as a real product.
+        <div style="margin-top:10px; color:var(--muted); font-size:13px">Litmus test: if you replace Bright Data with <span class="inline-code">requests + proxy</span> and nothing changes about your demo, you lose.</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">At a glance</h3>
+        <table>
+          <tr><th>Partners</th><td>WeMakeDevs × Bright Data</td></tr>
+          <tr><th>Dates</th><td><b>Live now → Aug 23, 2026</b> · Blog: <span class="inline-code">scrape-verse-kick-off.md</span> (2026-08-17)</td></tr>
+          <tr><th>Tracks</th><td>Web-Slinger (Grand) · Suit-Up (UI) · Spider-Sense (Clean Code) · Daily Bugle (LinkedIn) · Raffle (Iron Man Helmet)</td></tr>
+          <tr><th>Credits</th><td>Free tier 5,000/mo no card · Promo <span class="inline-code">wemakedevs</span> at signup · $50/participant · $2,500 pool</td></tr>
+          <tr><th>Author</th><td>Sachin Sharma, CMO WeMakeDevs</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section id="mandatory">
+    <h2><span class="num">1</span> Mandatory platform stack — what judges will verify</h2>
+    <p class="lede">The 6-step CLI is not a tutorial. It’s the rubric. Dashboard-only builds will be penalized for Grand Prize.</p>
+
+    <div class="card" style="padding:0; overflow:hidden">
+      <table>
+        <tr><th>#</th><th>Command</th><th>Purpose</th><th style="min-width:240px">Judge verification signal</th></tr>
+        <tr><td><span class="badge">1</span></td><td><span class="mono">npx -p @brightdata/cli</span></td><td>Ephemeral install — no global</td><td>Repo/demo shows <span class="inline-code">npx</span> invocation, Node ≥18</td></tr>
+        <tr><td><span class="badge">2</span></td><td><span class="mono">bdata login</span></td><td>OAuth → token</td><td>Units after it succeed; CI uses env-injected token, not interactive</td></tr>
+        <tr><td><span class="badge green">3</span></td><td><span class="mono">bdata scraper create &lt;URL&gt; "&lt;data you need&gt;"</span></td><td>NL → Collector <span class="inline-code">c_*</span></td><td><b>Critical artifact.</b> Collector ID documented, prompt specificity judged. Vague = weak.</td></tr>
+        <tr><td><span class="badge">4</span></td><td><span class="mono">bdata scraper run &lt;COLLECTOR_ID&gt; &lt;URL&gt;</span></td><td>Run → structured JSON</td><td>JSON evidence from terminal, not dashboard click</td></tr>
+        <tr><td><span class="badge green">5</span></td><td><span class="mono">bdata scraper heal &lt;COLLECTOR_ID&gt; "&lt;what broke&gt;"</span></td><td>Self-heal on change</td><td><b>Theme compliance.</b> Real breakage + heal with same ID. Skipping = fails theme.</td></tr>
+        <tr><td><span class="badge">6</span></td><td><span class="mono">bdata scraper approve &lt;COLLECTOR_ID&gt;</span> / <span class="mono">--reject</span></td><td>Human gate on heal diff</td><td>Shows review of proposed patch before merge</td></tr>
+      </table>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">Collector lifecycle</h3>
+        <div class="flow" style="margin:10px 0">
+          <span>create → c_*</span><span class="arrow">→</span><span>run / POST /dca/trigger</span><span class="arrow">→</span><span>heal (proposed)</span><span class="arrow">→</span><span>approve → same c_*</span>
+        </div>
+        <ul class="clean">
+          <li>Format <span class="inline-code">c_*</span> — permanent handle. Heal is <b>mutative</b>, not a new collector. Creating <span class="inline-code">c_new</span> to fix breakage = fails self-healing.</li>
+          <li>Trigger: <span class="inline-code">POST /dca/trigger { collector_id: "c_xxx" }</span> — REST with token from login. Async job → poll/webhook for delivery.</li>
+          <li>Scheduling: Bright Data native cron or your own (GH Actions, Vercel Cron, node-cron). One must be documented and running.</li>
+          <li>Store <span class="inline-code">c_*</span> in env (<span class="inline-code">COLLECTOR_ID</span>), never hardcoded, never logged.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">What Bright Data handles vs you handle</h3>
+        <div class="grid2" style="gap:12px">
+          <div>
+            <div class="badge green" style="margin-bottom:6px">Platform handles — don’t rebuild</div>
+            <ul class="clean">
+              <li>Proxy rotation, geo</li><li>Browser rendering / JS / SPA</li><li>CAPTCHA solving & unblocking</li><li>Retries, backoff, concurrency</li><li>Scheduling & data delivery</li><li>Heal AI (selector adaptation)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="badge amber" style="margin-bottom:6px">You must handle</div>
+            <ul class="clean">
+              <li>NL prompt engineering</li><li>Collector API wiring</li><li>JSON validation (zod), storage, dedupe</li><li>App layer on top of output</li><li>Breakage detection → heal trigger</li><li>Demo harness & compliance proof</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout warn" style="margin-top:14px; font-size:13px"><b>Anti-pattern:</b> Reimplementing proxies/Playwright/CAPTCHA. Judges want you to delegate and focus on heal + product value.</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:16px">
+      <b>Terminal-first requirement:</b> “Keep terminal as your UI (Claude Code / Cursor / Codex)”. Compliant = agent prompts generate <span class="inline-code">bdata</span> calls, git shows co-authored commits, video shows terminal, dashboard only to confirm <span class="inline-code">c_*</span> health/schedule. Non-compliant = dashboard-only creation/running, pretty Studio clicks as sole proof.
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="judging">
+    <h2><span class="num">2</span> Judging — scorecards per track</h2>
+    <p class="lede">Grand Prize needs all four pillars. Suit-Up, Spider-Sense, and Daily Bugle are complementary — architect once, qualify for three.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">🏆 Web-Slinger — Grand Prize (Best Use of Bright Data) — DGX Spark $5k</h3>
+        <table>
+          <tr><th>Rank</th><th>Criterion</th><th>Weight</th><th>What scores 90+</th></tr>
+          <tr><td>1</td><td>Self-healing & resilience</td><td><b>30%</b></td><td>Live DOM break → heal log selector <span class="inline-code">.price → [data-testid=price]</span> → data recovers, agent notified</td></tr>
+          <tr><td>2</td><td>Drive from coding agent</td><td><b>25%</b></td><td>NL in terminal → agent tool → Collector → streamed JSON → reasoning. Not a button.</td></tr>
+          <tr><td>3</td><td>Build in Studio</td><td><b>25%</b></td><td>Custom Collector, typed schema, pagination/JS, long-tail site, deduplication</td></tr>
+          <tr><td>4</td><td>Build WITH output</td><td><b>20%</b></td><td>Collector is API consumed by app/agent with persistence, diff, alerts — not a CSV dump</td></tr>
+        </table>
+        <div style="margin-top:10px; font-size:12px; color:var(--muted)">Bonus tie-breakers: public-data ethics, Collector exposed as live API, edge-case handling. Penalty: using any of 800 prebuilts with zero customization = bottom quartile.</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">🦸 Suit-Up — Best UI (iPad / member)</h3>
+        <table>
+          <tr><th>Criterion</th><th>Weight</th><th>Wins vs loses</th></tr>
+          <tr><td>Finished product feel</td><td>35%</td><td>Deployed URL, loading/empty/error states vs localhost screenshot</td></tr>
+          <tr><td>Data intelligibility</td><td>25%</td><td>Filters, search, viz vs raw JSON table</td></tr>
+          <tr><td>Interaction</td><td>20%</td><td>Agent chat → data → viz loop vs static dashboard</td></tr>
+          <tr><td>Freshness signal</td><td>10%</td><td>“Last scraped · healed at 14:03” badge proves live pipeline</td></tr>
+        </table>
+        <div class="callout bad" style="margin-top:12px; font-size:13px">Disqualifies on sight if data looks mocked. Must prove live <span class="inline-code">POST /dca/trigger</span>.</div>
+        <h3>🕷️ Spider-Sense — Clean Code (Keychron / member)</h3>
+        <table>
+          <tr><th>Criterion</th><th>Weight</th><th>Checked</th></tr>
+          <tr><td>Reliability / edge cases</td><td>30%</td><td>Try/catch, retry, Zod, null handling, pagination fails</td></tr>
+          <tr><td>Structure & modularity</td><td>25%</td><td><span class="inline-code">collectors/</span> <span class="inline-code">agents/tools/</span> <span class="inline-code">lib/brightdata.ts</span> · env config</td></tr>
+          <tr><td>Readability</td><td>20%</td><td>Intent names, typed schemas, README &lt;5 min setup, diagram</td></tr>
+          <tr><td>Contributability</td><td>15%</td><td>Lint/format, git hygiene, <span class="inline-code">.env.example</span>, Issues</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">🗞️ Daily Bugle — LinkedIn (Galaxy Watch)</h3>
+        <p style="font-size:13px; color:var(--muted)">Judged by marketing, not engineers. Story &gt; feature list. LinkedIn only.</p>
+        <table>
+          <tr><th>Criterion</th><th>Weight</th><th>Tactic</th></tr>
+          <tr><td>Story angle</td><td>35%</td><td>Problem → long-tail → heal demo → quantified payoff. Not “we used Bright Data”.</td></tr>
+          <tr><td>Tag WeMakeDevs</td><td>20%</td><td><b>Must @WeMakeDevs page tag</b> (not #). Add @Bright Data. Without tag, invisible.</td></tr>
+          <tr><td>Visual proof</td><td>20%</td><td>30s terminal → Collector → chart updating (native video > screenshots)</td></tr>
+          <tr><td>Value proof</td><td>15%</td><td>“1,200 SKUs tracked hourly, 12% delta found”</td></tr>
+          <tr><td>Timing</td><td>10%</td><td>Post Aug 20–22, 9–11am IST. Not Aug 23 night.</td></tr>
+        </table>
+        <div style="margin-top:10px; font-size:12px">Hashtags 4–6: <span class="inline-code">#ScrapeVerse #WeMakeDevs #BrightData</span>. Put links in body + pinned comment (LinkedIn deprioritizes externals, judges still need them).</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Raffle + Credits</h3>
+        <div class="pill alt" style="margin-bottom:8px">🎟️ Iron Man MK5 Helmet — just register</div>
+        <div style="font-size:13px">No code, no submission needed. Every team member should register individually — expected value scales with entries.</div>
+        <hr style="border:0; border-top:1px solid var(--line); margin:14px 0">
+        <h3 style="margin-top:0">Credit economics</h3>
+        <table>
+          <tr><th>Layer</th><th>Amount</th><th>Note</th></tr>
+          <tr><td>Free tier</td><td>5,000 / mo</td><td>No card, per account</td></tr>
+          <tr><td>Promo</td><td><span class="inline-code">wemakedevs</span></td><td>Apply at signup, before you burn free tier</td></tr>
+          <tr><td>Per participant</td><td>$50</td><td>4-person team ≈ 20k+ credits effective</td></tr>
+          <tr><td>Prize pool</td><td>$2,500 pool</td><td>Top teams / office-hours request — not guaranteed</td></tr>
+        </table>
+        <div style="font-size:12px; color:var(--muted); margin-top:8px">Small niche site: 0.5–2 credits/page. Full 1–5k page scrape ≈ 500–2k credits → 10–20 runs free. Scope narrow (800–2k records deep, not 100k shallow). Cache <span class="inline-code">sample.json</span> for UI dev; only hit live Collector for integration/demo.</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:16px">
+      <b>Cross-track stack (one project, three lenses):</b>
+      <div class="flow" style="margin-top:10px"><span>Long-tail site</span><span class="arrow">→</span><span>Studio Collector + typed schema</span><span class="arrow">→</span><span>Agent tool bright_data</span><span class="arrow">→</span><span>API /api/collect / diff</span><span class="arrow">→</span><span>Next.js chat UI</span><span class="arrow">→</span><span>GH lint/type/tests</span></div>
+      <div style="margin-top:10px; font-size:13px; color:var(--muted)">Grand + Suit-Up + Spider-Sense complementary. Build data flowing Aug 17–19, polish Aug 20, hygiene Aug 21, heal-demo + LinkedIn Aug 22.</div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="ideas">
+    <h2><span class="num">3</span> Project ideas — ranked by judging EV</h2>
+    <p class="lede">Nine prompts from the brief. Standalone ranking first, then hybrids that actually win.</p>
+
+    <div class="card" style="padding:0; overflow:hidden">
+      <table>
+        <tr><th>Rank</th><th>Idea</th><th>G</th><th>Suit-Up</th><th>Sense</th><th>N</th><th>C</th><th>Verdict</th></tr>
+        <tr><td><b>1</b></td><td><b>#3 Goal-and-walk-away</b></td><td>10</td><td>9</td><td>8</td><td>10</td><td>9</td><td><span class="badge green">HERO — Moonshot</span></td></tr>
+        <tr><td><b>2</b></td><td><b>#4 Self-healing hero</b></td><td>9</td><td>10</td><td>9</td><td>9</td><td>5</td><td><span class="badge green">HERO — Judges’ darling</span></td></tr>
+        <tr><td><b>3</b></td><td><b>#5 CI, no humans</b></td><td>7</td><td>10</td><td>7</td><td>7</td><td>6</td><td><span class="badge amber">HERO/SAFE — ENG clap</span></td></tr>
+        <tr><td>4</td><td>#8 Keyword (no URLs)</td><td>8</td><td>7</td><td>9</td><td>9</td><td>7</td><td><span class="badge">Dark horse</span></td></tr>
+        <tr><td>5</td><td>#2 Prompt-to-production</td><td>7</td><td>8</td><td>6</td><td>6</td><td>4</td><td><span class="badge">Safe — Foundation</span></td></tr>
+        <tr><td>6</td><td>#7 Competitive intel</td><td>7</td><td>7</td><td>10</td><td>7</td><td>5</td><td><span class="badge">Safe — Sense winner</span></td></tr>
+        <tr><td>7</td><td>#6 Docs → RAG</td><td>6</td><td>6</td><td>7</td><td>5</td><td>5</td><td><span class="badge">Safe but crowded</span></td></tr>
+        <tr><td>8</td><td>#9 Parallel battle</td><td>6</td><td>8</td><td>6</td><td>8</td><td>9</td><td><span class="badge red">Risk — gimmick trap</span></td></tr>
+        <tr><td>9</td><td>#1 One-prompt scraper</td><td>4</td><td>4</td><td>3</td><td>3</td><td>2</td><td><span class="badge red">Risk — trivial</span></td></tr>
+      </table>
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-top:6px">G=Grand Prize, N=Novelty, C=Complexity (10 hardest). #1 is tutorial completion — 50 teams will submit it. Use only as Day-1 MVP.</div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">Hybrids that win (stack, don’t pick one)</h3>
+        <div class="timeline">
+          <div class="node">
+            <b>Hybrid A — The Unbreakable Pipeline</b> <span class="badge green">Recommended — highest hit-rate</span><br>
+            <span class="mono" style="font-size:12px">#2 Pipeline + #4 Heal + #5 CI</span><br>
+            <span style="font-size:13px">Discovery → GH Actions cron (3am) → POST /dca/trigger → validate rows → if fail: claude -p heal → re-trigger → upsert S3/Supabase → Slack “42 new rows”</span><br>
+            <em style="font-size:12px; color:var(--muted)">Tagline: “One prompt, one PR, fresh data nightly — even when the site breaks.” Demo = 6 green checks + 1 yellow healed run.</em>
+          </div>
+          <div class="node">
+            <b>Hybrid B — Autonomous Scout (Grand Prize moonshot)</b><br>
+            <span class="mono" style="font-size:12px">#3 Goal Agent + #8 Keyword + #4 Healing</span><br>
+            <span style="font-size:13px">Plain-English goal → planner picks Search vs Discovery vs Sitemap → generates prompt → schedules → verifies → heals</span><br>
+            <em style="font-size:12px; color:var(--muted)">“Describe the data you want. We find the site, build the scraper, and keep it alive.” Hardest, unbeatable at 80%.</em>
+          </div>
+          <div class="node">
+            <b>Hybrid C — Living Knowledge</b><br>
+            <span class="mono" style="font-size:12px">#6 RAG + #7 Intel + #4 Healing</span><br>
+            <span style="font-size:13px">Sitemap docs+changelogs → chunk/embed → nightly diff by hash → re-embed changed only → RAG with citations + weekly intel report</span><br>
+            <em style="font-size:12px; color:var(--muted)">Sensing knowledge drift. Healing solves RAG’s dirty secret: docs redesigns.</em>
+          </div>
+          <div class="node">
+            <b>Hybrid D — Battle-Tested (flex)</b><br>
+            <span class="mono" style="font-size:12px">#9 Battle as selection for #2</span><br>
+            <span style="font-size:13px">3 subagents propose 3 Discovery prompts in worktrees → judge picks winner on valid_rows/cost → winner promoted to CI pipeline</span><br>
+            <em style="font-size:12px; color:var(--muted)">Justifies #9 complexity — battle isn’t gimmick, it’s model selection.</em>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Anti-patterns — why good pitches fail</h3>
+        <ul class="clean">
+          <li><b>“One-prompt + pretty dashboard”</b> — 40 teams do it. Judges ask “why not prebuilt?” and “what happens tomorrow?” No answer = 6/10.</li>
+          <li><b>“Docs RAG without citations/incremental”</b> — 2023. Need Sitemap diff, re-embed, <span class="inline-code">source: url#anchor</span>.</li>
+          <li><b>“10 sites in parallel — fast!”</b> — <span class="inline-code">Promise.all</span> theater without judge metric. Needs coverage/schema/cost criteria + shipped winner.</li>
+          <li><b>“Agent writes Python scrapers”</b> — Competing <em>against</em> Bright Data. Agent must output Studio prompt/collector, not Cheerio/XPath.</li>
+          <li><b>“Intel that summarizes without diffing”</b> — Not sensing change. Store last-week snapshot, embed-diff, then summarize <span class="inline-code">+3/-1</span> table.</li>
+        </ul>
+        <div class="callout warn" style="margin-top:12px; font-size:13px"><b>Scope guard:</b> Solo/duo → Hybrid A in 6 days (Discovery long-tail → trigger → S3 → GH cron → heal loop → diff/PR wall). That’s 80% of a win; rest is polish + heal video.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="types">
+    <h2><span class="num">4</span> Scraper types — pick correctly or lose points</h2>
+    <p class="lede">Using PDP for a listing page (and manually looping) signals you don’t understand the platform.</p>
+    <div class="grid2">
+      <div class="card">
+        <table>
+          <tr><th>Type</th><th>Input</th><th>When</th><th>Mechanism</th></tr>
+          <tr><td><span class="badge">PDP</span></td><td>Single URL</td><td>One item, consistent schema</td><td>AI extracts fields from one DOM</td></tr>
+          <tr><td><span class="badge">Discovery</span></td><td>Listing URL</td><td>Category → N detail pages + pagination</td><td>Discover links → scrape each PDP</td></tr>
+          <tr><td><span class="badge">Sitemap</span></td><td>sitemap.xml</td><td>Exhaustive 200–2k pages</td><td>Parse sitemap → scrape each</td></tr>
+          <tr><td><span class="badge">Search</span></td><td>Keyword + country</td><td>No URL known, intent-driven</td><td>SERP → discover → PDP</td></tr>
+        </table>
+        <div style="margin-top:12px; font-size:13px">
+          <b>Heuristic:</b> 1 URL+1 item=PDP · 1 URL+N behind pagination=Discovery · site-wide=Sitemap (preferred over Discovery) · intent only=Search.<br>
+          <span style="color:var(--muted)">Judges expect you to justify type choice in README/demo. Cite why others were wrong.</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Long-tail examples (zero prebuilt)</h3>
+        <table>
+          <tr><th>Idea</th><th>Site (defensible)</th><th>Type</th></tr>
+          <tr><td>Wholesale intel</td><td><span class="mono">faire.com/category/ceramics</span></td><td>Discovery — long-tail, paginated</td></tr>
+          <tr><td>Auction catalog</td><td><span class="mono">catawiki.com / bringatrailer.com</span></td><td>Discovery</td></tr>
+          <tr><td>Docs RAG</td><td><span class="mono">docs.n8n.io / tauri.app</span></td><td>Sitemap</td></tr>
+          <tr><td>Changelog intel</td><td><span class="mono">linear.app / supabase.com changelog</span></td><td>Sitemap ×5 cross-domain</td></tr>
+          <tr><td>Keyword find</td><td><span class="mono">wanted.co.kr “AI PM Seoul”</span></td><td>Search (no URL)</td></tr>
+        </table>
+        <div class="callout" style="margin-top:12px; font-size:13px">Avoid: Amazon, Walmart, LinkedIn, Instagram, Zillow, Indeed, Booking — prebuilt exists → instant low-effort signal. Screenshot Bright Data Catalog “0 results for your domain” in README.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="practices">
+    <h2><span class="num">5</span> Best practices & compliance — how to avoid DQ</h2>
+    <p class="lede">Five practices = rubric. #4 (public data) and #5 (secrets) are disqualifiers. #1, #3, #5 are differentiation.</p>
+    <div class="card" style="padding:0; overflow:hidden">
+      <table>
+        <tr><th>#</th><th>Practice</th><th>What judges check</th><th>How to prove</th><th>Red flag</th></tr>
+        <tr><td>1</td><td><b>Long tail</b></td><td>Avoid 800+ prebuilts</td><td>Catalog search screenshot “0 results”, niche site + one-sentence why no prebuilt</td><td>Amazon/LinkedIn, generic “news”</td></tr>
+        <tr><td>2</td><td><b>Terminal as UI</b></td><td>Built *from* agent</td><td><span class="inline-code">CLAUDE.md</span>, git co-authorship, terminal recording, GH workflow from prompt</td><td>Single-commit zip, no agent config, dashboard tour demo</td></tr>
+        <tr><td>3</td><td><b>Self-healing</b></td><td>Recovers without breaking workflow</td><td>baseline → break → heal → recover, same <span class="inline-code">c_*</span>, persisted heal log</td><td>try/catch retry same selector, manual code edit, no evidence</td></tr>
+        <tr><td>4</td><td><b>Public data only</b></td><td>No login/paywall/PII</td><td>Incognito verifiable URL, <span class="inline-code">robots.txt</span> excerpt, field list (no PII)</td><td>Auth wall, paywall bypass, emails/phones scraped</td></tr>
+        <tr><td>5</td><td><b>Collector as API</b></td><td><span class="inline-code">c_*</span> as primitive</td><td><span class="inline-code">POST /dca/trigger</span> from cron/DB/agent/dashboard, env-var’d</td><td>Dashboard click only, hardcoded <span class="inline-code">c_*</span> in frontend</td></tr>
+      </table>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">Public data — safe vs risky</h3>
+        <table>
+          <tr><th>Category</th><th>✅ Safe</th><th>❌ Risky / DQ</th></tr>
+          <tr><td>E-commerce</td><td>Public catalog, price, SKU (no login to see)</td><td>Reviews with names, cart/wishlist, “login to see wholesale”</td></tr>
+          <tr><td>Docs</td><td>Public docs, open API docs, gov tenders</td><td>Notion/Confluence behind SSO, partner portals</td></tr>
+          <tr><td>Long tail</td><td>Mandi prices, factual listings (no owner contact)</td><td>Matrimonial, job portals with phone/email, real-estate owner numbers</td></tr>
+        </table>
+        <div style="margin-top:10px; font-size:12px; color:var(--muted)">Required artifact: <span class="inline-code">COMPLIANCE.md</span> or README section — Target URL + public (incognito) + robots.txt Allow + ToS citation + fields (no PII) + rate limit + retention. Judges will check <span class="inline-code">/robots.txt</span> live.</div>
+        <div class="codeblock" style="margin-top:10px">Target: https://example-regional-catalog.com/products
+Public: Yes (incognito, no auth)  |  robots.txt: Allow /products, Crawl-delay 2s
+Fields: product_name, price, specs, availability (no PII)
+Rate: 1 req/2s, retention: ephemeral 7 days</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Secret management — 12-factor</h3>
+        <div class="grid2" style="gap:10px">
+          <div class="codeblock" style="font-size:11px"># .env  (NEVER commit)
+BRIGHTDATA_TOKEN=brd_xxxxx
+BRIGHTDATA_COLLECTOR_ID=c_xxxxxxxx
+
+# .env.example (committed)
+BRIGHTDATA_TOKEN=your_token_here
+BRIGHTDATA_COLLECTOR_ID=your_id_here</div>
+          <div class="codeblock" style="font-size:11px"># .gitignore must contain
+.env
+.env.local
+*.pem
+
+# GitHub Actions
+env:
+  BRIGHTDATA_TOKEN: ${{ secrets.BRIGHTDATA_TOKEN }}</div>
+        </div>
+        <div class="callout bad" style="margin-top:12px; font-size:13px"><b>Audit before push:</b> <span class="inline-code">git log --all -p | grep -E "brd_|c_[a-z0-9]{6,}|Bearer"</span> must be empty. Rotate immediately if ever exposed.</div>
+        <div style="margin-top:10px; font-size:13px"><b>Collector ID hygiene:</b> Env-var’d, not hardcoded. Proves you treat it as swappable config — Collector-as-API, not constant.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">Collector-as-API — 4 integration patterns (implement ≥1, ideally #1 + #3)</h3>
+      <div class="grid2">
+        <div>
+          <div><span class="badge green">1 · Cron / Scheduler</span> <span style="font-size:13px">GH Actions <span class="inline-code">schedule</span> → <span class="inline-code">POST /dca/trigger</span> → webhook. Simplest, proves autonomy.</span></div>
+          <div style="margin-top:8px"><span class="badge green">2 · DB-driven</span> <span style="font-size:13px">DB trigger → worker → <span class="inline-code">POST</span> with URL param → INSERT → healing persists to DB.</span></div>
+        </div>
+        <div>
+          <div><span class="badge green">3 · AI Agent</span> <span style="font-size:13px"><b>Highest appeal</b>. User prompt → agent → <span class="inline-code">triggerCollector</span> → validate → <span class="inline-code">healCollector</span> if incomplete.</span></div>
+          <div style="margin-top:8px"><span class="badge">4 · Dashboard</span> <span style="font-size:13px">Internal Next.js “Rescrape” button → backend <span class="inline-code">POST</span> → poll → table. Human-in-loop stakeholder demo.</span></div>
+        </div>
+      </div>
+      <div class="codeblock" style="margin-top:12px">POST https://api.brightdata.com/dca/trigger?collector=c_xxxxxxxx
+Authorization: Bearer $BRIGHTDATA_TOKEN
+Body: { "input": { "url": "https://target.com/page2" } }
+→ { "collection_id": "col_yyy", "status": "triggered" }</div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="heal">
+    <h2><span class="num">6</span> Self-healing — the hero demo</h2>
+    <p class="lede">The entire point of Bright Data vs generic scraping. If you skip this, you compete as a generic scraper and lose Best Use regardless of product polish.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">State machine (same <span class="inline-code">c_*</span>)</h3>
+        <div class="flow" style="font-size:12px; margin:10px 0"><span>create</span><span class="arrow">→</span><span>run ✓ JSON</span><span class="arrow">→</span><span>site change → run ✗ 0/partial</span><span class="arrow">→</span><span>heal “price selector .price → [data-testid=price]”</span><span class="arrow">→</span><span>approve</span><span class="arrow">→</span><span>run ✓ recovered</span></div>
+        <div style="font-size:13px">Downstream untouched: DB, dashboard, API consumers still hit same <span class="inline-code">c_*</span> via <span class="inline-code">POST /dca/trigger</span>. No re-wiring.</div>
+        <div class="callout" style="margin-top:12px; font-size:13px"><b>Heal semantics:</b> <span class="inline-code">bdata scraper heal &lt;ID&gt; "&lt;what broke&gt;"</span> — description must be specific (“product price moved from .price to span.amount after redesign”), not “fix it”. Follow with <span class="inline-code">approve</span> (or <span class="inline-code">--reject</span> to discard). Judges check Heal is mutative.</div>
+        <h3>60-second demo script (your crescendo)</h3>
+        <ol style="font-size:13px; margin:8px 0 0 18px">
+          <li>Agent: “find cheapest Y on [site]” → 5 rows.</li>
+          <li>Change class / hide element (DevTools) or show pre-recorded site update.</li>
+          <li>Re-run same prompt → heal log: <span class="inline-code">selector .price-v1 not found → healed to [data-testid="price"]</span></li>
+          <li>Data returns again. Show downstream DB/slack still flowing.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Failure modes & detection</h3>
+        <table>
+          <tr><th>Break</th><th>Symptom</th><th>Heal handles?</th></tr>
+          <tr><td>Class rename</td><td>0 records, <span class="inline-code">200 OK</span> but empty</td><td>✅ core case — AI locators</td></tr>
+          <tr><td>Structure / redesign</td><td>Fields wrong type, pagination broken</td><td>✅ with schema re-inference</td></tr>
+          <tr><td>Anti-bot / CAPTCHA</td><td><span class="inline-code">403/429</span>, CAPTCHA HTML</td><td>⚠️ platform unblocker, <b>don’t heal</b> on this — retry only</td></tr>
+          <tr><td>JS rendering shift</td><td>Shell HTML, no data</td><td>✅ browser rendering layer</td></tr>
+          <tr><td>Pagination change</td><td>Count drop &gt;50%</td><td>✅ Discovery re-discovers</td></tr>
+          <tr><td>Downtime <span class="inline-code">5xx</span></td><td>Timeouts</td><td>❌ <b>never heal</b> — backoff + alert</td></tr>
+        </table>
+        <div style="margin-top:12px">
+          <b style="font-size:13px">Detection triggers (before heal):</b>
+          <ul class="clean" style="font-size:13px">
+            <li><span class="inline-code">recordCount == 0</span> or <span class="inline-code">completeness &lt; 90%</span></li>
+            <li>Field null-rate spike (e.g., <span class="inline-code">price</span> null &gt;30%)</li>
+            <li>Canary: known product must always be present</li>
+            <li>Schema validation via <span class="inline-code">zod</span> + rolling avg drop &gt;50%</li>
+          </ul>
+          <div class="callout warn" style="margin-top:10px; font-size:13px"><b>Guardrails:</b> Require 2 consecutive <span class="inline-code">200+empty</span> before heal. Max 3 heal attempts then alert. Validate healed selector matches ≥ expected nodes before persisting. Kill switch <span class="inline-code">HEALING_ENABLED=false</span>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">Automation ladder</h3>
+        <table>
+          <tr><th>Level</th><th>Flow</th><th>Judge love</th></tr>
+          <tr><td>Manual</td><td>Detect empty → human runs <span class="inline-code">heal</span> + <span class="inline-code">approve</span></td><td>Baseline — passes theme</td></tr>
+          <tr><td>Semi-auto</td><td>Detector → propose heal → human gate → re-trigger → log diff to PR</td><td>Strong</td></tr>
+          <tr><td>Full auto</td><td>GH Actions cron fails → <span class="inline-code">claude -p</span> heals → auto-approve if confidence &gt;0.9 → re-run → green check</td><td><b>Wall of green</b></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Downstream resilience — why same ID matters</h3>
+        <ul class="clean" style="font-size:13px">
+          <li>Pipeline: <span class="inline-code">POST /dca/trigger c_*</span> → S3 versioned JSON → DuckDB — no code change on heal.</li>
+          <li>DB: Upsert by <span class="inline-code">sku/url</span> — re-run is idempotent, no dupes.</li>
+          <li>UI: “Healed at 14:03” badge proves liveness, not mock.</li>
+          <li>Alert: Slack “Healed selector X — no action needed” — proves recovering without breaking workflow.</li>
+        </ul>
+        <div style="margin-top:10px; font-size:13px; color:var(--muted)">Judges want: authenticity (real site change > artificial HTML edit), observability (structured logs with <span class="inline-code">runId, oldSelector, newSelector, completenessBefore/After</span>), rollback via previous config.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="checklist">
+    <h2><span class="num">7</span> Pre-submission checklists — run these 10 min before push</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Submission compliance</h3>
+        <ul style="list-style:none; padding:0; margin:0">
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> Target public (incognito), no login/paywall, <span class="inline-code">robots.txt</span> documented</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> Zero PII fields; compliance statement in README</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> <span class="inline-code">.env</span> in <span class="inline-code">.gitignore</span>, <span class="inline-code">git log</span> clean, <span class="inline-code">.env.example</span> placeholders only</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> <span class="inline-code">c_*</span> documented + prompt verbatim; <span class="inline-code">BRIGHTDATA_TOKEN</span> env-var’d, never logged, rotated if exposed</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> README answers “why not prebuilt?” with Marketplace search screenshot</li>
+          <li style="padding:6px 0"><input type="checkbox"> <span class="inline-code">POST /dca/trigger</span> shown live from cron / agent / DB / dashboard (code + curl)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Engineering & demo</h3>
+        <ul style="list-style:none; padding:0; margin:0">
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> <span class="inline-code">npm ci && npm test</span> passes on fresh clone; fixtures <span class="inline-code">before/after.html</span></li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> Selectors centralized with fallback chain, Zod validation, structured logs, lint passes</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> Terminal-first evidence: <span class="inline-code">CLAUDE.md</span> + git co-authorship + recording</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> Heal demo rehearsed: baseline → break → heal → recover (same <span class="inline-code">c_*</span>), downstream untouched</li>
+          <li style="padding:6px 0; border-bottom:1px solid var(--line)"><input type="checkbox"> Healing guardrails: no heal on <span class="inline-code">5xx/429</span>, completeness threshold, max 3 tries</li>
+          <li style="padding:6px 0"><input type="checkbox"> LinkedIn post live, @WeMakeDevs tagged, video native, links in body + pinned comment</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">Your repo must contain (judges will open these first)</h3>
+      <div class="grid2">
+        <div class="codeblock" style="font-size:12px">collectors/&lt;site&gt;.json   # exported Collector schema
+lib/brightdata.ts            # Collector-as-API wrapper + validation
+agents/tools/brightDataTool.ts  # agent tool (trigger + heal)
+/app/api/collect/route.ts    # serves validated JSON
+.env.example                 # BRIGHT_DATA_API_KEY=, COLLECTOR_ID=
+README.md                    # architecture + 5-min setup + GIF
+COMPLIANCE.md                # public-data proof + robots.txt</div>
+        <div>
+          <b style="font-size:13px">3-minute pitch order (do not reorder):</b>
+          <ol style="font-size:13px; margin:8px 0 0 18px">
+            <li><b>20s</b> Long-tail gap — “800 prebuilts, but [niche] has no API”</li>
+            <li><b>40s</b> Studio — Collector build + schema + live JSON</li>
+            <li><b>60s</b> Terminal — agent prompt → tool → Collector → insight (“Collector as API, driven by agent”)</li>
+            <li><b>60s</b> Heal — break → heal → data still flows (crescendo)</li>
+            <li><b>20s</b> Product — live URL with timestamp, not CSV</li>
+          </ol>
+          <div class="callout" style="margin-top:12px; font-size:13px"><b>One-sentence positioning:</b> “We turned an unreliable, undocumented long-tail website into a reliable, typed, self-healing API that our coding agent can reason over — built in Studio, driven from the terminal, powering [your product].”</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- footer -->
+  <div class="card" style="margin-top:18px; background:linear-gradient(135deg, var(--ink), #2a2a24); color:#f2efe8; border-color:#2a2a24">
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+      <span style="font:700 13px JetBrains Mono,monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2)">What your project must prove</span>
+      <span class="pill alt" style="font-size:11px">Still needs audit vs your repo — next step</span>
+    </div>
+    <div style="margin-top:10px; font-size:14px; line-height:1.5; color:#d6d6d0">
+      When I audit <span class="inline-code" style="background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.14); color:#f2efe8">/Users/jay/Documents/Projects/scrape-verse-project</span>, I’ll check: does it have a real <span class="inline-code" style="background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.14); color:#f2efe8">c_*</span> wired to <span class="inline-code" style="background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.14); color:#f2efe8">POST /dca/trigger</span>? Is there a recorded heal demo (same ID)? Is terminal the UI (CLAUDE.md + git + Actions)? Is the site truly long-tail + public + no PII? Does the app consume JSON as an API (not a dump)? Those five gates decide which tracks you’re actually competing for.
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Sources: <a href="https://www.wemakedevs.org/blogs/scrape-verse-kick-off">wemakedevs.org/blogs/scrape-verse-kick-off</a> · <a href="https://raw.githubusercontent.com/WeMakeDevs/blogs/main/posts/scrape-verse-kick-off.md">raw markdown</a> · synthesized from 5 parallel analysts</span>
+    <span>Report generated 2026-08-18 · Before build audit — no repo assumptions</span>
+  </div>
+
+</div>

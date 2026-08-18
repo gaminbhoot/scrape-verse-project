@@ -2,7 +2,6 @@ name: AegisScrape Autonomous Self-Healing Pipeline
 
 on:
   schedule:
-    # Run every 6 hours to verify collector health
     - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
@@ -13,7 +12,7 @@ on:
 
 jobs:
   scrape-and-heal:
-    name: Scrape Heartbeat & Auto-Heal
+    name: Scrape Heartbeat & Auto-Heal (heal → approve)
     runs-on: ubuntu-latest
 
     steps:
@@ -40,26 +39,29 @@ jobs:
         id: collector_run
         run: |
           echo "Executing Collector heartbeat..."
-          npm run test || echo "HEAL_TRIGGERED=true" >> $GITHUB_ENV
+          node scripts/heartbeat.mjs || echo "HEAL_TRIGGERED=true" >> $GITHUB_ENV
 
       - name: Execute Autonomous Self-Healing (if broken)
         if: env.HEAL_TRIGGERED == 'true'
         run: |
           echo "⚠️ DOM Mismatch / Selector Breakdown detected!"
           echo "Initiating AI Self-Healing via Bright Data CLI..."
-          npx @brightdata/cli bdata scraper heal c_layoffs_v2_hackathon "Automated CI/CD detection: Target DOM classes shifted"
-          
+          npx @brightdata/cli bdata scraper heal c_layoffs_v2_hackathon "Automated CI/CD detection: Target DOM classes shifted" --format json
+          echo "Heal completed — status=awaiting_approval — now approving"
+          npx @brightdata/cli bdata scraper approve c_layoffs_v2_hackathon --auto-approve
+
       - name: Create Pull Request with Healed Selectors
         if: env.HEAL_TRIGGERED == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "fix(collector): autonomous self-healed selectors via Bright Data CLI"
-          title: "🤖 [AegisScrape Auto-Heal] Repaired Collector Selectors"
+          commit-message: "fix(collector): autonomous self-healed selectors via Bright Data CLI (heal → approve)"
+          title: "🤖 [AegisScrape Auto-Heal] Repaired Collector Selectors (heal + approve)"
           body: |
             ## Autonomous Self-Healing Summary
             - **Collector**: `c_layoffs_v2_hackathon`
             - **Trigger**: Automated Cron Heartbeat detected DOM schema mismatch.
-            - **Action Taken**: Ran `bdata scraper heal` and regenerated resilient selector mappings.
+            - **Action Taken**: Ran `bdata scraper heal` → `bdata scraper approve --auto-approve` and regenerated resilient selector mappings.
+            - **Envelope**: awaiting_approval → approved
             - **Verification**: 100% data fidelity restored.
           branch: auto-heal/collector-update

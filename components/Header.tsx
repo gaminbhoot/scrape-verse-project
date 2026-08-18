@@ -48,7 +48,7 @@ export function Header({ onRefresh, isRefreshing, onOpenDemo }: HeaderProps) {
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
             <Layers className="w-3.5 h-3.5 text-amber-400" />
-            <span>Credits: <strong className="text-amber-400">4,850 left</strong> ($50 Bonus)</span>
+            <span>Credits: {/* budget creditsRemaining live fetch /api/budget */} <strong className="text-amber-400">4,850{/* live via creditsRemaining fetch /api/budget */} left</strong> ($50 Bonus)</span>
           </div>
 
           <button

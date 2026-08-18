@@ -1,4 +1,4 @@
-export type ScraperStatus = 'healthy' | 'healing' | 'degraded' | 'broken' | 'recovered';
+export type ScraperStatus = 'healthy' | 'healing' | 'awaiting_approval' | 'degraded' | 'broken' | 'recovered';
 
 export interface SelectorMap {
   field: string;

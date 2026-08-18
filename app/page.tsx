@@ -87,6 +87,7 @@ export default function Home() {
       setHealingId(id);
       const res = await fetch(`/api/scrapers/${id}/heal`, { method: 'POST' });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Heal failed');
       if (data.healEvent) {
         setHealEvents((prev) => [data.healEvent, ...prev]);
         setLastHealStats({
@@ -95,13 +96,27 @@ export default function Home() {
           confidenceScore: data.healEvent.confidenceScore,
         });
       }
-      if (data.verifiedRun) {
-        setRuns((prev) => [data.verifiedRun, ...prev]);
-      }
-      setDemoStatus('recovered');
+      setDemoStatus('healing');
       await fetchData();
     } catch (err) {
       console.error('Healing failed:', err);
+    } finally {
+      setHealingId(null);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      setHealingId(id);
+      const res = await fetch(`/api/scrapers/${id}/approve`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Approve failed');
+      if (data.healEvent) setHealEvents((prev) => [data.healEvent, ...prev]);
+      if (data.verifiedRun) setRuns((prev) => [data.verifiedRun, ...prev]);
+      setDemoStatus('recovered');
+      await fetchData();
+    } catch (err) {
+      console.error('Approve failed:', err);
     } finally {
       setHealingId(null);
     }
@@ -166,6 +181,7 @@ export default function Home() {
               onRun={handleRun}
               onHeal={handleHeal}
               onBreak={handleBreak}
+            onApprove={handleApprove}
               runningId={runningId}
               healingId={healingId}
             />

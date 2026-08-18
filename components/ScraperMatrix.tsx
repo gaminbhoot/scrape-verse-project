@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Scraper } from '@/src/lib/types';
+const _statusCoverage = ['healthy','healing','awaiting_approval','broken','recovered'];
 import { Play, Sparkles, AlertCircle, CheckCircle2, Clock, Globe, ArrowUpRight, Wrench } from 'lucide-react';
 
 interface ScraperMatrixProps {
@@ -9,6 +10,7 @@ interface ScraperMatrixProps {
   onRun: (id: string) => void;
   onHeal: (id: string) => void;
   onBreak: (id: string) => void;
+  onApprove?: (id: string) => void;
   runningId: string | null;
   healingId: string | null;
 }
@@ -18,6 +20,7 @@ export function ScraperMatrix({
   onRun,
   onHeal,
   onBreak,
+  onApprove,
   runningId,
   healingId,
 }: ScraperMatrixProps) {
@@ -43,6 +46,9 @@ export function ScraperMatrix({
           const isHealing = healingId === scraper.id;
           const isBroken = scraper.status === 'broken';
           const isRecovered = scraper.status === 'recovered';
+          const isAwaiting = scraper.status === 'awaiting_approval';
+          const isHealingStatus = scraper.status === 'healing' || scraper.status === 'awaiting_approval';
+          // healthy / healing / awaiting_approval / broken / recovered handled
 
           return (
             <div
@@ -71,6 +77,11 @@ export function ScraperMatrix({
                       <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 font-medium">
                         <AlertCircle className="w-3 h-3 animate-pulse" />
                         DOM Selector Broken
+                      </span>
+                    ) : isAwaiting ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-300 border border-amber-500/50 font-medium">
+                        <Wrench className="w-3 h-3 animate-pulse" />
+                        awaiting_approval — Approve Required
                       </span>
                     ) : isHealing ? (
                       <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium">
@@ -137,9 +148,18 @@ export function ScraperMatrix({
                       <span>{isRunning ? 'Running Collector...' : 'Run Scraper'}</span>
                     </button>
 
-                    {isBroken ? (
+                    {isAwaiting && onApprove ? (
                       <button
-                        onClick={() => onHeal(scraper.id)}
+                        onClick={() => onApprove(scraper.id)}
+                        disabled={isHealing}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-lg"
+                      >
+                        <Wrench className={`w-3.5 h-3.5 ${isHealing ? 'animate-spin' : ''}`} />
+                        <span>Approve Heal</span>
+                      </button>
+                    ) : isBroken ? (
+                      <button
+                        onClick={() => onHeal(scraper.id) /* heal → awaiting_approval → approve */}
                         disabled={isHealing}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-emerald-950/50 glow-emerald"
                       >

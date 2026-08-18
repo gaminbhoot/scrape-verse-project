@@ -48,6 +48,9 @@ graph TD
 
 ## ⚡ Key Features
 
+> **Collector-as-API:** `POST https://api.brightdata.com/dca/trigger?collector=c_xxx` with `Authorization: Bearer $BRIGHT_DATA_API_KEY` — see `src/lib/brightdata.ts:triggerViaRest`. CLI `bdata scraper run/heal/approve` is fallback. Respects `robots.txt`, public data only, turns websites into structured data.
+
+
 1. **Autonomous Self-Healing (`bdata scraper heal`)**:
    - Detects layout shifts, obsolete CSS classes, and missing schema fields.
    - Automatically executes Bright Data healing heuristics to generate resilient semantic selectors.
