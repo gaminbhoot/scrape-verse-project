@@ -189,9 +189,9 @@ export default function Home() {
         }}
       />
 
-      <main className="flex-1 mx-auto flex w-full max-w-[1360px] flex-col gap-8 px-5 py-8 lg:px-6">
+      <main className="flex-1 mx-auto flex w-full max-w-[1360px] flex-col gap-10 px-6 py-10 lg:px-8">
         {/* Hero — premium editorial */}
-        <div className="relative overflow-hidden rounded-[18px] glass-panel p-6">
+        <div className="relative overflow-hidden rounded-[20px] border border-[#ece9e4] bg-white p-8 shadow-sm">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a86a]/20 to-transparent" />
           <div className="flex flex-col gap-3">
             <div className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.12em] text-white/40">
@@ -201,7 +201,7 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap items-baseline gap-3">
               <h2 className="display text-[28px] font-normal leading-none tracking-[-0.03em] text-white sm:text-[32px]">
-                Reliability, <span className="italic font-normal text-[#e2d1b1]">made visible.</span>
+                Reliability, <span className="italic font-light text-[#b8945a]">made visible.</span>
               </h2>
               <span className="font-mono text-xs text-white/40">Same c_* before and after heal • zero downstream changes</span>
             </div>
@@ -223,8 +223,8 @@ export default function Home() {
         </div>
 
         {/* Main Grid: Scraper Matrix + Live CLI Terminal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-8">
             <ScraperMatrix
               scrapers={scrapers}
               onRun={handleRun}
@@ -238,7 +238,7 @@ export default function Home() {
             <DiffViewer healEvents={healEvents} />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             <LiveTerminal logs={logs} />
             <DataExplorer runs={runs} />
           </div>

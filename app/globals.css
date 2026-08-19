@@ -1,43 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Premium Design Tokens ── */
+/* ── Light Editorial — Warm Stone & Brass ── */
 :root {
-  /* Obsidian ink base */
-  --bg: #02050a;
-  --bg-2: #070c1a;
-  --bg-3: #0a1122;
-  --surface: #0e1a30;
-  --surface-2: #111f3a;
-  --surface-3: #142040;
-  --border: #1b2b4d;
-  --border-strong: #24365f;
-  --hairline-gold: rgba(201, 168, 106, 0.18);
-  --hairline-gold-strong: rgba(201, 168, 106, 0.32);
+  --bg: #fdfcf9;
+  --bg-2: #fbf9f6;
+  --bg-3: #f6f3ee;
+  --surface: #ffffff;
+  --surface-2: #fdfcfa;
+  --border: #ece9e4;
+  --border-strong: #e2ddd6;
+  --hairline-gold: rgba(201, 168, 106, 0.22);
+  --hairline-gold-strong: rgba(201, 168, 106, 0.38);
 
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
-  --text-faint: #475569;
+  --ink: #0f172a;
+  --ink-2: #1e293b;
+  --muted: #64748b;
+  --dim: #94a3b8;
+  --faint: #cbd5e1;
 
-  --emerald: #10b981;
-  --emerald-soft: #0ea66f;
-  --cyan: #06b6d4;
-  --amber: #e8a63c;
-  --rose: #f43f5e;
-  --indigo: #7074e8;
-
-  /* premium brass */
-  --brass: #c9a86a;
-  --brass-2: #b8945a;
+  --brass: #b8945a;
+  --brass-light: #e2d1b1;
   --brass-ink: #2a2215;
 
-  --radius-lg: 18px;
-  --radius-xl: 22px;
-  --radius-2xl: 26px;
+  --emerald: #0d7a5f;
+  --emerald-soft: #0f8c6e;
+  --cyan: #0e7490;
+  --amber: #a16207;
+  --rose: #be123c;
 }
 
 html {
@@ -45,75 +38,68 @@ html {
 }
 
 body {
-  color: var(--text);
+  color: var(--ink);
   background: var(--bg);
   font-family:
     'Inter',
     system-ui,
     -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
     sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  line-height: 1.6;
 }
 
-/* ── Obsidian field with subtle brass vignette + grain ── */
+/* Warm paper field — ultra subtle */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(900px 420px at 14% -8%, rgba(201, 168, 106, 0.09), transparent 60%),
-    radial-gradient(900px 520px at 84% -12%, rgba(6, 182, 212, 0.08), transparent 62%),
-    radial-gradient(1100px 640px at 50% 118%, rgba(16, 185, 129, 0.06), transparent 70%),
-    linear-gradient(180deg, #02050a 0%, #060b1a 48%, #070c1a 100%);
+    radial-gradient(900px 420px at 12% -6%, rgba(201, 168, 106, 0.07), transparent 60%),
+    radial-gradient(900px 520px at 88% -10%, rgba(14, 116, 144, 0.04), transparent 62%),
+    linear-gradient(180deg, #fdfcf9 0%, #fbf9f6 60%, #f6f3ee 100%);
   pointer-events: none;
 }
 
+/* Grain — barely there */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  opacity: 0.035;
+  opacity: 0.018;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
-/* ── Scrollbar — premium thin brass ── */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #070c1a;
+  background: var(--bg-2);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #1e2d4d, #162040);
+  background: #e2ddd6;
   border-radius: 999px;
-  border: 1px solid rgba(201, 168, 106, 0.18);
+  border: 2px solid var(--bg-2);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #24365f, #1b2b4d);
+  background: #d6d1ca;
 }
 
-/* ── Premium glass — border gradient + inner highlight + layered shadow ── */
+/* ── Stone card — white paper, hairline, soft shadow ── */
 .glass-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01)) ,
-    rgba(14, 26, 48, 0.72);
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #ffffff;
+  border: 1px solid var(--border);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 28px 64px -28px rgba(0, 0, 0, 0.65),
-    0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 12px 32px -16px rgba(0, 0, 0, 0.08);
   position: relative;
 }
 
@@ -123,70 +109,44 @@ body::after {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(
-    180deg,
-    rgba(201, 168, 106, 0.22),
-    rgba(255, 255, 255, 0.06) 22%,
-    rgba(255, 255, 255, 0.03) 58%,
-    transparent 100%
-  );
+  background: linear-gradient(180deg, rgba(201, 168, 106, 0.18), rgba(201, 168, 106, 0.04) 28%, transparent 65%);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  opacity: 0.9;
+  opacity: 0.6;
 }
 
 .glass-card-hover {
   transition:
     transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.35s ease,
-    box-shadow 0.35s ease,
-    background 0.35s ease;
+    box-shadow 0.35s ease;
 }
 .glass-card-hover:hover {
-  transform: translateY(-3px);
-  border-color: rgba(201, 168, 106, 0.22);
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.07) inset,
-    0 32px 72px -28px rgba(0, 0, 0, 0.7),
-    0 12px 28px -14px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(201, 168, 106, 0.12);
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 8px 24px -12px rgba(0, 0, 0, 0.08),
+    0 16px 40px -20px rgba(0, 0, 0, 0.1);
 }
 
-/* ── Hairline utilities ── */
 .hairline-gold {
   border-color: var(--hairline-gold) !important;
 }
-.hairline-gold-strong {
-  border-color: var(--hairline-gold-strong) !important;
-}
 
-/* ── Premium glows — desaturated, tighter ── */
-.glow-emerald {
-  box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.18),
-    0 8px 32px -12px rgba(16, 185, 129, 0.45);
-}
-.glow-cyan {
-  box-shadow:
-    0 0 0 1px rgba(6, 182, 212, 0.18),
-    0 8px 32px -12px rgba(6, 182, 212, 0.42);
-}
-.glow-amber {
-  box-shadow:
-    0 0 0 1px rgba(232, 166, 60, 0.2),
-    0 8px 32px -12px rgba(232, 166, 60, 0.45);
-}
+.glow-emerald,
+.glow-cyan,
+.glow-amber,
 .glow-rose {
   box-shadow:
-    0 0 0 1px rgba(244, 63, 94, 0.2),
-    0 8px 32px -12px rgba(244, 63, 94, 0.45);
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px -12px rgba(0, 0, 0, 0.06);
 }
 
-/* ── Type — premium display ── */
 .display {
   font-family: 'Instrument Serif', Georgia, serif;
   letter-spacing: -0.035em;
@@ -196,22 +156,19 @@ body::after {
   font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
 }
 
-/* ── Brass rule ── */
 .brass-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 168, 106, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 106, 0.24), transparent);
 }
 
-/* ── Terminal chrome ── */
 .terminal-chrome {
-  background: linear-gradient(180deg, #0f1a30, #0a1122);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0f172a;
+  border: 1px solid #1e293b;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 20px 48px -20px rgba(0, 0, 0, 0.65);
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 48px -20px rgba(0, 0, 0, 0.18);
 }
 
-/* ── Animations ── */
 @keyframes terminal-blink {
   0%,
   100% {
@@ -224,7 +181,6 @@ body::after {
 .animate-cursor {
   animation: terminal-blink 1s infinite;
 }
-
 @keyframes shimmer {
   0% {
     background-position: -200% 0;

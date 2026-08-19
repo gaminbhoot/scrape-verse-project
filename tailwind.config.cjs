@@ -10,40 +10,40 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#02050a',
-        surface: '#0e1a30',
-        'surface-elevated': '#142040',
-        border: '#1b2b4d',
+        background: '#fdfcf9',
+        surface: '#ffffff',
+        'surface-elevated': '#fdfcfa',
+        border: '#ece9e4',
+        ink: '#0f172a',
+        muted: '#64748b',
         brass: {
-          DEFAULT: '#c9a86a',
-          soft: '#b8945a',
-          ink: '#2a2215',
+          DEFAULT: '#b8945a',
+          soft: '#c9a86a',
           light: '#e2d1b1',
+          ink: '#2a2215',
         },
         accent: {
-          emerald: '#10b981',
-          cyan: '#06b6d4',
-          amber: '#e8a63c',
-          rose: '#f43f5e',
-          indigo: '#7074e8',
+          emerald: '#0d7a5f',
+          cyan: '#0e7490',
+          amber: '#a16207',
+          rose: '#be123c',
+          indigo: '#4f46e5',
         },
       },
       fontFamily: {
         display: ['Instrument Serif', 'Georgia', 'serif'],
-        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'monospace'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
-        '2xl': '18px',
+        '2xl': '20px',
         '3xl': '24px',
         '4xl': '28px',
       },
       boxShadow: {
-        premium:
-          '0 1px 0 rgba(255,255,255,0.06) inset, 0 28px 64px -28px rgba(0,0,0,0.65), 0 8px 24px -12px rgba(0,0,0,0.5)',
-        'premium-hover':
-          '0 1px 0 rgba(255,255,255,0.07) inset, 0 32px 72px -28px rgba(0,0,0,0.7), 0 12px 28px -14px rgba(0,0,0,0.55)',
-        brass: '0 0 0 1px rgba(201,168,106,0.16), 0 8px 24px -12px rgba(201,168,106,0.25)',
+        stone: '0 1px 2px rgba(0,0,0,0.04), 0 12px 32px -16px rgba(0,0,0,0.08)',
+        'stone-hover': '0 8px 24px -12px rgba(0,0,0,0.08), 0 16px 40px -20px rgba(0,0,0,0.10)',
+        brass: '0 0 0 1px rgba(201,168,106,0.14), 0 8px 24px -12px rgba(201,168,106,0.18)',
       },
       animation: {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

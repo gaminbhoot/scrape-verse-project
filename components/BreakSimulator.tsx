@@ -13,7 +13,6 @@ interface BreakSimulatorProps {
 
 export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, lastHealStats }: BreakSimulatorProps) {
   const [loading, setLoading] = useState(false);
-
   const handleStep1 = async () => {
     setLoading(true);
     await onSimulateBreak();
@@ -42,37 +41,31 @@ export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, l
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[18px] glass-panel p-6">
+    <div className="relative overflow-hidden rounded-[20px] border border-[#ece9e4] bg-white p-7 shadow-sm md:p-8">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a86a]/20 to-transparent" />
-      <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-rose-500/[0.06] blur-3xl" />
 
-      {/* Header */}
-      <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-rose-500/10 ring-1 ring-rose-500/20">
-            <Bug className="h-5 w-5 text-rose-300" />
+      <div className="flex flex-col gap-4 border-b border-[#f1f5f9] pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-rose-50 ring-1 ring-rose-100">
+            <Bug className="h-5 w-5 text-rose-600" />
           </div>
           <div>
-            <h3 className="display flex items-center gap-2 text-[18px] font-normal tracking-[-0.02em] text-white">
+            <h3 className="display flex items-center gap-2 text-[19px] font-normal tracking-[-0.02em] text-[#0f172a]">
               Demo Playground
-              <span className="rounded-full border border-[#c9a86a]/20 bg-[#c9a86a]/10 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-[#e2d1b1]">
-                JUDGE MODE
-              </span>
+              <span className="rounded-full border border-[#c9a86a]/20 bg-[#fdf8ef] px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.12em] text-[#b8945a]">JUDGE MODE</span>
             </h3>
-            <p className="font-mono text-[11px] tracking-wide text-white/45">
-              Break the site, detect the drift, watch it heal — same <span className="text-white/70">c_*</span>
+            <p className="font-mono text-[12px] tracking-wide text-[#94a3b8]">
+              Break the site, detect the drift, watch it heal — same <span className="font-semibold text-[#0f172a]">c_*</span>
             </p>
           </div>
         </div>
-        <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-mono text-[11px] text-white/60">
-          Target <span className="ml-1.5 font-semibold text-cyan-300">c_layoffs_v2_hackathon</span>
+        <div className="inline-flex rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-3.5 py-2 font-mono text-[11px] text-[#64748b]">
+          Target <span className="ml-1.5 font-semibold text-[#0e7490]">c_layoffs_v2_hackathon</span>
         </div>
       </div>
 
-      {/* Stepper */}
-      <div className="relative mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* connector line */}
-        <div className="pointer-events-none absolute left-6 right-6 top-[22px] hidden h-px bg-gradient-to-r from-white/10 via-white/10 to-white/10 md:block" />
+      <div className="relative mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="pointer-events-none absolute left-8 right-8 top-[26px] hidden h-px bg-[#ece9e4] md:block" />
 
         {[
           {
@@ -83,9 +76,7 @@ export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, l
             action: handleStep1,
             icon: ShieldAlert,
             cta: '1 — Break',
-            activeFrom: ['idle'],
-            doneWhen: ['broken', 'failed-run', 'healing', 'recovered'],
-            color: '#f43f5e',
+            color: '#be123c',
           },
           {
             n: 2,
@@ -95,9 +86,7 @@ export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, l
             action: handleStep2,
             icon: Play,
             cta: '2 — Run',
-            activeFrom: ['broken'],
-            doneWhen: ['failed-run', 'healing', 'recovered'],
-            color: '#e8a63c',
+            color: '#a16207',
           },
           {
             n: 3,
@@ -107,9 +96,7 @@ export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, l
             action: handleStep3,
             icon: Sparkles,
             cta: '3 — Heal',
-            activeFrom: ['failed-run', 'broken'],
-            doneWhen: ['recovered'],
-            color: '#10b981',
+            color: '#0d7a5f',
           },
         ].map(s => {
           const state = stepState(s.n);
@@ -119,50 +106,46 @@ export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, l
           return (
             <div
               key={s.n}
-              className={`relative rounded-2xl border p-4 backdrop-blur transition ${
+              className={`relative rounded-2xl border p-6 transition ${
                 isActive
-                  ? 'border-white/15 bg-white/[0.06] shadow-premium'
+                  ? 'border-[#0f172a] bg-[#0f172a] text-white shadow-lg'
                   : isDone
-                    ? 'border-white/10 bg-white/[0.03]'
-                    : 'border-white/[0.06] bg-white/[0.02] opacity-70'
+                    ? 'border-emerald-200 bg-emerald-50'
+                    : 'border-[#ece9e4] bg-[#fdfcfa]'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-semibold tracking-[0.14em] text-white/30">STEP 0{s.n}</span>
                 <span
-                  className="rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide"
-                  style={{
-                    background: isActive ? `${s.color}18` : isDone ? '#10b98118' : 'rgba(255,255,255,0.04)',
-                    color: isActive ? s.color : isDone ? '#10b981' : 'rgba(255,255,255,0.35)',
-                    border: `1px solid ${isActive ? s.color + '30' : isDone ? '#10b98130' : 'rgba(255,255,255,0.08)'}`,
-                  }}
+                  className={`font-mono text-[10px] font-semibold tracking-[0.14em] ${isActive ? 'text-white/60' : isDone ? 'text-emerald-700' : 'text-[#94a3b8]'}`}
+                >
+                  STEP 0{s.n}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold tracking-wide ${isDone ? 'bg-emerald-600 text-white' : isActive ? 'bg-white text-[#0f172a]' : 'border border-[#e2e8f0] bg-white text-[#94a3b8]'}`}
                 >
                   {isDone ? 'Done' : isActive ? s.k : s.k}
                 </span>
               </div>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-2.5">
                 <span
-                  className="grid h-7 w-7 place-items-center rounded-full border text-xs font-semibold"
-                  style={{
-                    background: isDone ? '#10b98114' : isActive ? `${s.color}14` : 'rgba(255,255,255,0.04)',
-                    borderColor: isDone ? '#10b98130' : isActive ? `${s.color}30` : 'rgba(255,255,255,0.08)',
-                    color: isDone ? '#10b981' : isActive ? s.color : 'rgba(255,255,255,0.5)',
-                  }}
+                  className={`grid h-8 w-8 place-items-center rounded-full border text-sm font-semibold ${isDone ? 'border-emerald-200 bg-white text-emerald-700' : isActive ? 'border-white/20 bg-white/10 text-white' : 'border-[#e2e8f0] bg-white text-[#64748b]'}`}
                 >
                   {isDone ? '✓' : s.n}
                 </span>
-                <div className="text-[13px] font-semibold tracking-[-0.01em] text-white">{s.title}</div>
+                <div className={`text-[14px] font-semibold tracking-[-0.01em] ${isActive ? 'text-white' : isDone ? 'text-emerald-900' : 'text-[#0f172a]'}`}>{s.title}</div>
               </div>
-              <p className="mt-2 text-[12px] leading-5 text-white/50">{s.desc}</p>
+              <p className={`mt-2 text-[13px] leading-5 ${isActive ? 'text-white/70' : isDone ? 'text-emerald-700/70' : 'text-[#64748b]'}`}>{s.desc}</p>
               <button
                 onClick={s.action}
                 disabled={loading || isDone || isIdle}
-                className={`mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition disabled:opacity-40 cursor-pointer ${
+                className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold transition disabled:opacity-40 cursor-pointer ${
                   s.n === 3
-                    ? 'bg-white text-[#070c1a] hover:bg-white/90 shadow-[0_8px_24px_-12px_rgba(255,255,255,0.5)]'
-                    : s.n === 1
-                      ? 'border border-rose-500/20 bg-rose-500/10 text-rose-200 hover:bg-rose-500/15'
-                      : 'border border-amber-500/20 bg-amber-500/10 text-amber-200 hover:bg-amber-500/15'
+                    ? isActive
+                      ? 'bg-white text-[#0f172a] hover:bg-[#f8fafc]'
+                      : 'bg-[#0f172a] text-white hover:bg-[#1e293b]'
+                    : isActive
+                      ? 'bg-white text-[#0f172a]'
+                      : 'border border-[#e2e8f0] bg-white text-[#0f172a] hover:bg-[#f8fafc]'
                 }`}
               >
                 <s.icon className="h-3.5 w-3.5" />
@@ -174,15 +157,15 @@ export function BreakSimulator({ onSimulateBreak, onRunBroken, onHeal, status, l
       </div>
 
       {status === 'recovered' && lastHealStats && (
-        <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 font-mono text-xs text-emerald-200">
-            <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 font-mono text-xs text-emerald-800">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             <span>
-              <strong className="font-semibold text-white">Recovered</strong> in{' '}
-              <span className="font-bold text-white">{lastHealStats.timeToHealMs}ms</span> • confidence {lastHealStats.confidenceScore}%
+              <strong className="font-semibold text-emerald-900">Recovered</strong> in{' '}
+              <span className="font-bold text-emerald-900">{lastHealStats.timeToHealMs}ms</span> • {lastHealStats.confidenceScore}% confidence
             </span>
           </div>
-          <code className="max-w-[420px] truncate rounded-full border border-white/10 bg-black/20 px-2.5 py-1 font-mono text-[11px] text-cyan-200">
+          <code className="max-w-[420px] truncate rounded-full border border-emerald-200 bg-white px-3 py-1 font-mono text-[11px] text-emerald-700">
             {lastHealStats.cliCommand}
           </code>
         </div>
