@@ -1,0 +1,2094 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AegisScrape — Project Audit & Missing Report</title>
+    <style>
+      :root {
+        --bg: #080c14;
+        --panel: #0f172a;
+        --panel2: #0b1222;
+        --border: #1e293b;
+        --border2: #1f3560;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --dim: #64748b;
+        --emerald: #10b981;
+        --cyan: #06b6d4;
+        --amber: #f59e0b;
+        --rose: #f43f5e;
+        --indigo: #6366f1;
+        --violet: #8b5cf6;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--cyan);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        font-family:
+          JetBrains Mono,
+          ui-monospace,
+          Menlo,
+          monospace;
+        font-size: 0.92em;
+      }
+      pre {
+        font-family:
+          JetBrains Mono,
+          ui-monospace,
+          Menlo,
+          monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .mono {
+        font-family:
+          JetBrains Mono,
+          ui-monospace,
+          Menlo,
+          monospace;
+      }
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 28px 20px 60px;
+      }
+      .hero {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(8, 12, 20, 0.92));
+        overflow: hidden;
+        position: relative;
+      }
+      .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(720px 220px at 20% -10%, rgba(16, 185, 129, 0.18), transparent 60%),
+          radial-gradient(620px 220px at 90% -10%, rgba(6, 182, 212, 0.16), transparent 60%),
+          radial-gradient(700px 240px at 55% 110%, rgba(99, 102, 241, 0.12), transparent 70%);
+      }
+      .hero-inner {
+        position: relative;
+        padding: 28px 26px 22px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(8px);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .badge b {
+        color: var(--text);
+      }
+      h1 {
+        margin: 14px 0 8px;
+        font-size: 30px;
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+      }
+      .subtitle {
+        color: var(--muted);
+        max-width: 860px;
+        font-size: 14px;
+      }
+      .grid4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 18px;
+      }
+      @media (max-width: 860px) {
+        .grid4 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 540px) {
+        .grid4 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .kpi {
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.65);
+        border-radius: 14px;
+        padding: 14px 14px;
+      }
+      .kpi .label {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dim);
+        font-weight: 700;
+      }
+      .kpi .val {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-top: 6px;
+      }
+      .kpi .hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .kpi.good {
+        border-color: rgba(16, 185, 129, 0.28);
+      }
+      .kpi.warn {
+        border-color: rgba(245, 158, 11, 0.28);
+      }
+      .kpi.bad {
+        border-color: rgba(244, 63, 94, 0.3);
+      }
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 22px 0;
+      }
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        background: rgba(8, 12, 20, 0.72);
+        border-bottom: 1px solid var(--border);
+        margin: 0 -20px;
+        padding: 10px 20px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .nav a {
+        font-size: 12px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.6);
+        color: var(--muted);
+      }
+      .nav a:hover {
+        color: var(--text);
+        border-color: var(--border2);
+      }
+      .section {
+        margin-top: 26px;
+      }
+      .section h2 {
+        font-size: 18px;
+        letter-spacing: -0.02em;
+        margin: 0 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section h2 .icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.8);
+        font-size: 14px;
+      }
+      .card {
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(11, 18, 34, 0.72));
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .card + .card {
+        margin-top: 12px;
+      }
+      .h3 {
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 800;
+        margin: 0 0 10px;
+      }
+      .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.5);
+      }
+      .table th {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dim);
+        text-align: left;
+        padding: 10px 12px;
+        background: rgba(8, 12, 20, 0.65);
+        border-bottom: 1px solid var(--border);
+      }
+      .table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(30, 41, 59, 0.7);
+        font-size: 13px;
+        vertical-align: top;
+      }
+      .table tr:last-child td {
+        border-bottom: none;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        border: 1px solid;
+      }
+      .pill.crit {
+        color: #fecdd3;
+        background: rgba(244, 63, 94, 0.14);
+        border-color: rgba(244, 63, 94, 0.32);
+      }
+      .pill.high {
+        color: #fde68a;
+        background: rgba(245, 158, 11, 0.12);
+        border-color: rgba(245, 158, 11, 0.3);
+      }
+      .pill.med {
+        color: #a5f3fc;
+        background: rgba(6, 182, 212, 0.12);
+        border-color: rgba(6, 182, 212, 0.3);
+      }
+      .pill.low {
+        color: #bbf7d0;
+        background: rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.28);
+      }
+      .pill.ok {
+        color: #bbf7d0;
+        background: rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.28);
+      }
+      .pill.fail {
+        color: #fecdd3;
+        background: rgba(244, 63, 94, 0.12);
+        border-color: rgba(244, 63, 94, 0.3);
+      }
+      .progress {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .progress > i {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+      }
+      .callout {
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid;
+        font-size: 13px;
+      }
+      .callout.bad {
+        background: rgba(244, 63, 94, 0.08);
+        border-color: rgba(244, 63, 94, 0.24);
+        color: #fecdd3;
+      }
+      .callout.warn {
+        background: rgba(245, 158, 11, 0.08);
+        border-color: rgba(245, 158, 11, 0.24);
+        color: #fde68a;
+      }
+      .callout.good {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.24);
+        color: #bbf7d0;
+      }
+      .callout.info {
+        background: rgba(6, 182, 212, 0.08);
+        border-color: rgba(6, 182, 212, 0.24);
+        color: #a5f3fc;
+      }
+      .cols2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 860px) {
+        .cols2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      ul {
+        margin: 8px 0 0 18px;
+        padding: 0;
+      }
+      li {
+        margin: 6px 0;
+        color: var(--text);
+        font-size: 13px;
+      }
+      li small {
+        color: var(--muted);
+      }
+      .kbd {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: rgba(8, 12, 20, 0.8);
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .toc li {
+        margin: 4px 0;
+      }
+      .check {
+        color: var(--emerald);
+      }
+      .cross {
+        color: var(--rose);
+      }
+      .dash {
+        color: var(--amber);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="badge">
+            🛡️ AegisScrape · <b>scrape-verse-project</b> · Audit date
+            <span class="mono">2026-08-19</span> · branch <span class="mono">main</span> · 4 commits
+          </div>
+          <h1>Project Audit & Missing Report — What Will Lose You the Prize If You Don't Fix It</h1>
+          <p class="subtitle">
+            Deep scan of <span class="mono">src/lib/brightdata.ts</span>,
+            <span class="mono">store.ts</span>, all 8 API routes, 104 tests, 3 GH workflows, 6
+            components, docs and the
+            <span class="mono">SCRAPEVERSE_REQUIREMENTS_ANALYSIS.md</span> rubric. Verdict:
+            <b>you are 72% there</b> — the self-healing engine is real, the tests are harsh and
+            passing, the UI is polished. But 7 P0 gaps map directly to the judging scorecard and
+            will cap you at 2nd place unless fixed before Aug 23.
+          </p>
+          <div class="grid4">
+            <div class="kpi good">
+              <div class="label">Maturity</div>
+              <div class="val">72 / 100</div>
+              <div class="hint">Strong engine, polish needed for deploy + evidence</div>
+              <div class="progress" style="margin-top: 10px">
+                <i
+                  style="
+                    width: 72%;
+                    background: linear-gradient(90deg, var(--emerald), var(--cyan));
+                  "
+                ></i>
+              </div>
+            </div>
+            <div class="kpi warn">
+              <div class="label">Tests</div>
+              <div class="val">104 / 104 ✔</div>
+              <div class="hint">
+                <span class="mono">npm test</span> green · <span class="mono">npm run build</span> ✔
+                with warnings
+              </div>
+            </div>
+            <div class="kpi warn">
+              <div class="label">Tracks at risk</div>
+              <div class="val">2 blocked</div>
+              <div class="hint">Suit-Up (no URL) · Daily Bugle (no post)</div>
+            </div>
+            <div class="kpi bad">
+              <div class="label">Days to deadline</div>
+              <div class="val">4 days</div>
+              <div class="hint">Aug 23 · P0s are fixable in ~6 hours</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav">
+        <a href="#verdict">Verdict</a><a href="#nailed">What you nailed</a
+        ><a href="#p0">🔴 P0 Critical</a><a href="#p1">🟠 P1 High</a><a href="#p2">🟡 P2 Medium</a
+        ><a href="#p3">⚪ Polish</a><a href="#scorecard">Scorecard</a><a href="#prod">Production</a
+        ><a href="#security">Security</a><a href="#terminal">Terminal-first</a
+        ><a href="#plan">Action plan</a>
+      </div>
+
+      <div class="section" id="verdict">
+        <h2><span class="icon">⚖️</span> Executive verdict — read this if you read nothing else</h2>
+        <div class="cols2">
+          <div class="card">
+            <div class="h3">Why judges will like you</div>
+            <ul>
+              <li>
+                <b>Self-healing is not theater.</b> <span class="mono">brightdata.ts</span> spawns
+                <span class="mono">npx @brightdata/cli</span> via <span class="mono">spawn</span>,
+                captures <span class="mono">stdout/stderr/envelope</span>, handles
+                <span class="mono">timeout/402/429</span>, escapes args.
+                <span class="mono">store.ts</span> implements
+                <span class="mono">healthy → broken → healing → awaiting_approval → recovered</span>
+                with a heal lock.
+              </li>
+              <li>
+                <b>104 harsh tests pass</b> — the repo's own harsh suite covers clinic, budgeting,
+                concurrency (200 parallel, interleaved break/heal), fuzz, DOM resilience, API
+                sanitization.
+              </li>
+              <li>
+                <b>Collector-as-API is real:</b>
+                <span class="mono"
+                  >POST https://api.brightdata.com/dca/trigger?collector=c_xxx</span
+                >
+                is wired via <span class="mono">triggerViaRest</span> with Bearer auth; CLI is
+                fallback.
+              </li>
+              <li>
+                <b>Persistence exists</b> — <span class="mono">better-sqlite3</span> on
+                <span class="mono">DATABASE_URL=file:./data/aegis.db</span>, tables for
+                runs/heal_events/logs. Types include <span class="mono">awaiting_approval</span>.
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="h3">Why you still won't win Grand Prize today</div>
+            <div class="callout bad" style="margin-bottom: 10px">
+              <b>Three Grand Prize pillars are unproven in the wild.</b> No deployed URL, no live
+              Collector evidence (Studio screenshot + marketplace 0-results), no terminal recording.
+              Judges open README → click URL → see nothing → assume mock. Heal demo is interactive
+              button only, not a recorded 5-act story with
+              <span class="mono">same c_* before/after</span>.
+            </div>
+            <ul>
+              <li>
+                <span class="pill crit">P0</span> Suit-Up requires a live URL + freshness badge —
+                <span class="mono">localhost:3000</span> screenshot is a DQ signal per §9.2.
+              </li>
+              <li>
+                <span class="pill crit">P0</span> Web-Slinger <b>25%</b> “Drive from coding agent”
+                is undocumented beyond <span class="mono">CLAUDE.md</span> — no
+                <span class="mono">terminal.cast</span>, no git co-authorship visible in log (only 4
+                generic commits).
+              </li>
+              <li>
+                <span class="pill high">P1</span> <span class="mono">better-sqlite3</span> is native
+                — <span class="mono">next build</span> warns “Module not found” and Vercel
+                serverless has no disk persistence. Data evaporates on deploy.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="nailed">
+        <h2><span class="icon">✅</span> What you nailed — keep these</h2>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 36%">Area</th>
+                <th>Evidence</th>
+                <th style="width: 90px">Grade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Bright Data contract</b></td>
+                <td>
+                  <span class="mono">spawn('npx', ['@brightdata/cli', ...])</span>,
+                  <span class="mono">triggerViaRest</span> with
+                  <span class="mono">Authorization: Bearer</span>,
+                  <span class="mono">getBudget()</span> branches on env vs mock 4850, handles
+                  402/429, escapes <span class="mono">"</span>
+                </td>
+                <td><span class="pill ok">A</span></td>
+              </tr>
+              <tr>
+                <td><b>State machine</b></td>
+                <td>
+                  <span class="mono">ScraperStatus</span> covers
+                  <span class="mono">awaiting_approval</span>; <span class="mono">healLocks</span> +
+                  <span class="mono">pendingHeals</span>; <span class="mono">healScraper</span> →
+                  <span class="mono">approveScraper</span> only path to
+                  <span class="mono">recovered</span>; break idempotent
+                </td>
+                <td><span class="pill ok">A</span></td>
+              </tr>
+              <tr>
+                <td><b>Collector IDs</b></td>
+                <td>
+                  <span class="mono">c_layoffs_v2_hackathon</span>,
+                  <span class="mono">c_llm_benchmarks_live</span>,
+                  <span class="mono">c_ai_jobs_stream</span> documented and consistent across store,
+                  page, workflows
+                </td>
+                <td><span class="pill ok">A-</span></td>
+              </tr>
+              <tr>
+                <td><b>API hygiene</b></td>
+                <td>
+                  All 5 routes use <span class="mono">zod</span>
+                  <span class="mono">/^[a-zA-Z0-9_\-]+$/</span>, 400/404/409 mapping, no key leak to
+                  client (test asserts)
+                </td>
+                <td><span class="pill ok">A-</span></td>
+              </tr>
+              <tr>
+                <td><b>Persistence hook</b></td>
+                <td>
+                  <span class="mono">better-sqlite3</span> auto-creates
+                  <span class="mono">data/aegis.db</span> with 3 tables;
+                  <span class="mono">INSERT OR REPLACE</span> on runs/heals/logs; reads back when
+                  logs &lt;5
+                </td>
+                <td><span class="pill ok">B+</span></td>
+              </tr>
+              <tr>
+                <td><b>UI</b></td>
+                <td>
+                  6 components (Header, MetricCards, ScraperMatrix, BreakSimulator, DiffViewer,
+                  LiveTerminal, DataExplorer) handle
+                  <span class="mono">healthy/healing/broken/awaiting_approval/recovered</span>
+                </td>
+                <td><span class="pill ok">B+</span></td>
+              </tr>
+              <tr>
+                <td><b>Docs & compliance</b></td>
+                <td>
+                  <span class="mono">COMPLIANCE.md</span>, <span class="mono">PRD.md</span>,
+                  <span class="mono">SYSTEM_ARCHITECTURE.md</span>,
+                  <span class="mono">PROJECT_CHARTER.md</span>, robots.txt + zero-PII cert + credit
+                  economics table
+                </td>
+                <td><span class="pill ok">A</span></td>
+              </tr>
+              <tr>
+                <td><b>CI</b></td>
+                <td>
+                  <span class="mono">ci.yml</span> (lint guard planned) +
+                  <span class="mono">scraper-heal.yml</span> cron
+                  <span class="mono">0 */6 * * *</span> with heal→approve→validate→PR
+                </td>
+                <td><span class="pill ok">B</span></td>
+              </tr>
+              <tr>
+                <td><b>Tests</b></td>
+                <td>
+                  104 tests, 0 fails, 742ms — adversarial DOM, concurrency, fuzz, budget/MTTR,
+                  security, fixtures offline
+                </td>
+                <td><span class="pill ok">A</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" id="p0">
+        <h2><span class="icon">🔴</span> P0 — Critical — fix before you record or submit</h2>
+        <div class="callout bad">
+          <b
+            >Each P0 directly maps to a judging checkbox that is either explicit in the brief (§4,
+            §7, §16) or in the Grand/Suit-Up scorecard.</b
+          >
+          Miss one and the score collapses even if demo is cute.
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-1</span> No deployed URL — Suit-Up track is unwinnable
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            Brief §9.2: “Looks/feels like finished product” =
+            <b>deployed URL, loading/empty/error states, responsive</b>. Localhost screenshot =
+            bottom 20%. README lists <span class="mono">npm run dev → localhost:3000</span> only. No
+            <span class="mono">vercel.json</span>, no Vercel project, no URL, no freshness badge.
+          </p>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>Fix</th>
+                <th>File</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="mono">npx vercel --prod</span> (or
+                  <span class="mono">render.com</span>) + add
+                  <span class="mono">vercel.json</span> with
+                  <span class="mono">DATABASE_URL</span> + cron alternative (Vercel Cron invokes
+                  <span class="mono">/api/cron/heartbeat</span>). Add live URL badge to README +
+                  header <span class="mono">last scraped · healed at 14:03</span>.
+                </td>
+                <td>
+                  <span class="mono">vercel.json</span>, <span class="mono">README.md</span>,
+                  <span class="mono">app/api/cron/heartbeat/route.ts</span>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="color: var(--dim); font-size: 12px">
+                  Blocker underneath: see P0-6 (sqlite on Vercel). Deploy without fixing persistence
+                  = deploys but loses data on every cold start.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-2</span> No live Collector proof — Web-Slinger pillar 1 & 3
+            unproven
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            Brief §4 (6-step CLI): judges grep <span class="mono">c_*</span> and expect Studio
+            screenshot + Collector ID + schema JSON in <span class="mono">/collectors/</span>. Your
+            <span class="mono">c_layoffs_v2_hackathon</span> etc. are plausible placeholders but
+            there is no Studio screenshot, no <span class="mono">c_mpohus372o5tmid1jk</span>-style
+            real ID, no “0 results” Marketplace screenshot proving long-tail (§12), no exported
+            schema file. Feels like mocks even though code is real.
+          </p>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>What to add</th>
+                <th>Where</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Create one real Collector via
+                  <span class="mono"
+                    >bdata scraper create https://layoffs.fyi/live-data "extract company, count,
+                    role, date …"</span
+                  >
+                  on a funded account; capture actual <span class="mono">c_*</span> returned.
+                  Screenshot Studio with ID visible + schema. Export JSON.
+                </td>
+                <td>
+                  <span class="mono">collectors/c_layoffs_v2.json</span> (new) +
+                  <span class="mono">README.md</span> embeds
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Bright Data Catalog search for each target URL: screenshot “0 results” page.
+                  One-liner justification: “Prebuilts cover Amazon/LinkedIn — none for layoffs.fyi
+                  because workforce niche + table→card morph”.
+                </td>
+                <td><span class="mono">docs/long-tail-proof.png</span></td>
+              </tr>
+              <tr>
+                <td>
+                  Store collector ID from env, not hardcoded fallback:
+                  <span class="mono">process.env.COLLECTOR_ID ?? c_layoffs…</span> — fail fast if
+                  missing in prod, mock only in dev.
+                </td>
+                <td>
+                  <span class="mono">src/lib/store.ts</span>, <span class="mono">.env.example</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-3</span> No terminal recording — “Coding agent as UI” is 25%
+            of Grand Prize
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            Brief §7 verbatim “Keep the terminal as your UI”. AGENTS.md exists, CLAUDE.md exists,
+            but git log shows 4 coarse commits (<span class="mono">feat: initial commit</span> …),
+            no <span class="mono">Co-Authored-By: Claude</span> trailer, no
+            <span class="mono">terminal.cast</span> / asciinema /
+            <span class="mono">docs/terminal.mp4</span>. Judges infer dashboard-only.
+          </p>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>Fix (do all 3)</th>
+                <th>Command</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Record 60–90s terminal:
+                  <span class="mono"
+                    >bdata login → bdata scraper create → run → heal → approve → run</span
+                  >
+                </td>
+                <td>
+                  <span class="mono">asciinema rec docs/terminal.cast</span> or Loom; embed GIF in
+                  README
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Make git tell the story: rebase or add 3+ atomic commits with
+                  <span class="mono">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</span>
+                </td>
+                <td>
+                  <span class="mono">git log --oneline --pretty</span> should show agent
+                  co-authorship
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Add <span class="mono">.cursor/rules</span> or keep
+                  <span class="mono">CLAUDE.md</span> with the exact prompts that generated
+                  <span class="mono">bdata</span> calls
+                </td>
+                <td>
+                  <span class="mono">CLAUDE.md</span> already good — keep, add prompt log appendix
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-4</span> 5-act demo story is not recorded — self-healing has
+            no 6-minute proof
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">BreakSimulator</span> is slick for judges clicking locally, but there
+            is no pre-recorded video proving
+            <span class="mono"
+              >BEFORE 1,240 rows · c_* → BREAK 0 rows · c_* → PROPOSED diff → RECOVERED 1,198 rows ·
+              c_* ✓ — FOUR STATES · ONE ID</span
+            >
+            (§21.6). Loom/YouTube link missing, README has no GIF.
+          </p>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>Shot list (copy verbatim, 5:30 total)</th>
+                <th>Line to say on camera</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  I Build (0:00–1:30) — terminal <span class="mono">create</span> → dashboard + DB
+                  rows, zoom on ID
+                </td>
+                <td>
+                  “Collector <span class="mono">c_layoffs_v2</span> — this ID is our contract.”
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  II Break (1:30–3:00) — re-run → 0 rows red,
+                  <span class="mono">validate.mjs FAIL</span>, screenshot diff hold 3s
+                </td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>
+                  III Heal (3:00–4:30) —
+                  <span class="mono"
+                    >bdata scraper heal "price is now span[data-testid=price]; pagination uses
+                    ?after cursor"</span
+                  >
+                  → diff side-by-side ≥2s
+                </td>
+                <td>“We're not rewriting. We're describing what changed.”</td>
+              </tr>
+              <tr>
+                <td>
+                  IV Approve & Recover (4:30–5:30) —
+                  <span class="mono">approve --auto-approve</span> → re-run → count restored →
+                  <b>same ID zoom</b>
+                </td>
+                <td>
+                  “Same Collector ID. Zero downstream changes. That's self-healing.” (hold 3s)
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  V Automate (bonus 5:30–6:00) — Actions tab → cron at 03:14 healed before standup →
+                  Slack “healed at 03:14”
+                </td>
+                <td>“Manual for story, semi-auto for safety, fully auto for sleep.”</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-5</span> <span class="mono">heartbeat.mjs</span> is a toy —
+            it will not trigger heal correctly in CI
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            Current file spawns <span class="mono">bdata scraper run</span> and exits 1 only on
+            non-zero exit code. It ignores <b>empty payload, schema drift, and REST mode</b>.
+            Validate step after heal validates the wrong fields. CI sets
+            <span class="mono">HEAL_TRIGGERED=true</span> only if heartbeat exits 1 — on a site that
+            returns 200 OK + 0 rows it will exit 0 and healing never fires. Judges reading
+            <span class="mono">scraper-heal.yml</span> will spot the gap instantly.
+          </p>
+          <pre
+            style="
+              margin-top: 10px;
+              background: rgba(8, 12, 20, 0.9);
+              border: 1px solid var(--border);
+              border-radius: 10px;
+              padding: 12px;
+            "
+          >
+// current (broken)
+const code = await run(['bdata','scraper','run', collector, url, '--format','json']);
+if (code!==0) process.exit(1)  // ← misses 0-row-200-OK + drift
+console.log('Heartbeat ok')</pre>
+          <pre
+            style="
+              background: rgba(8, 12, 20, 0.9);
+              border: 1px solid rgba(16, 185, 129, 0.25);
+              border-radius: 10px;
+              padding: 12px;
+            "
+          >
+// fix — what it should do
+// 1) prefer REST POST /dca/trigger when BRIGHT_DATA_API_KEY present
+// 2) save snapshot to data/latest-run.json
+// 3) run node scripts/validate.mjs on that snapshot
+// 4) exit 1 on empty / drift (>30% null) / 402 / 429 so GH Actions if: failure() fires
+// 5) exponential backoff on 429, no heal on 5xx (retry only)
+</pre>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>File to rewrite</th>
+                <th>Required behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="mono">scripts/heartbeat.mjs</span></td>
+                <td>
+                  REST→CLI fallback, capture JSON, write
+                  <span class="mono">data/latest-run.json</span>, call
+                  <span class="mono">validate.mjs</span> programmatically, map 429→backoff/no-heal,
+                  5xx→retry, empty/drift→exit 1
+                </td>
+              </tr>
+              <tr>
+                <td><span class="mono">scripts/validate.mjs</span></td>
+                <td>
+                  Load per-collector Zod schema (not hardcoded
+                  <span class="mono">['company','count','date']</span>), accept
+                  <span class="mono">--collector c_xxx</span>, threshold
+                  <span class="mono">nullRate &gt; 0.30</span> +
+                  <span class="mono">rows.length &lt; median*0.65</span> if history exists
+                </td>
+              </tr>
+              <tr>
+                <td><span class="mono">.github/workflows/scraper-heal.yml</span></td>
+                <td>
+                  Use <span class="mono">needs</span> +
+                  <span class="mono">if: failure()</span> correctly; current
+                  <span class="mono">echo HEAL_TRIGGERED</span> via
+                  <span class="mono">$GITHUB_ENV</span> is fragile — switch to job outputs
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-6</span> <span class="mono">better-sqlite3</span> will break
+            on deploy — data is ephemeral twice
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">npm run build</span> already warns “Module not found: Can't resolve
+            'better-sqlite3'”. It’s a native Node addon — Vercel/Render serverless has no persistent
+            disk, <span class="mono">data/*.db</span> is gitignored, so
+            <b>every deploy wipes history</b> and cold starts lose runs/heals. Dashboard
+            <span class="mono">totalRecordsExtracted</span> resets, judges see empty.
+          </p>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Effort</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <b>A — File fallback for prod:</b> keep
+                  <span class="mono">better-sqlite3</span> for local, add
+                  <span class="mono">src/lib/store.pg.ts</span> adapter for
+                  <span class="mono">DATABASE_URL</span> starting with
+                  <span class="mono">postgres://</span> (Vercel Postgres / Supabase / Neon / Turso).
+                  Branch via <span class="mono">process.env.DATABASE_URL</span> prefix.
+                </td>
+                <td>~2h</td>
+                <td>Recommended</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>B — Vercel Blob / S3 JSONL:</b> if no DB, persist to Vercel Blob as
+                  <span class="mono">runs/YYYY-MM-DD.jsonl</span>
+                </td>
+                <td>~1h</td>
+                <td>Cheapest</td>
+              </tr>
+              <tr>
+                <td>
+                  Fix build warning: make <span class="mono">require('better-sqlite3')</span> lazy +
+                  optional-dependency; next build should not crash when native not prebuilt on CI.
+                </td>
+                <td>~20m</td>
+                <td>Must do regardless</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill crit">P0-7</span> No lint/format gate — Spider-Sense 0/10 on
+            “contributability”
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">package.json</span> has
+            <span class="mono">"lint": "next lint"</span> but repo has
+            <b
+              >no <span class="mono">.eslintrc</span>, no <span class="mono">prettier.config</span>,
+              no <span class="mono">eslint-config-next</span> rules enforced</b
+            >. <span class="mono">next lint</span> runs but enforces almost nothing. Spider-Sense
+            checklist (§19) expects ESLint + Prettier + pre-commit + CI fail on lint. Judges run
+            <span class="mono">npm run lint</span> on fresh clone — yours passes trivially, but they
+            then open files and see 213 violations.
+          </p>
+          <table class="table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th>Fix</th>
+                <th>File</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="mono">npm i -D eslint eslint-config-next prettier</span> + add
+                  <span class="mono">.eslintrc.json</span> extending
+                  <span class="mono">next/core-web-vitals</span>,
+                  <span class="mono">.prettierrc</span>, <span class="mono">lint-staged</span> +
+                  <span class="mono">husky</span> pre-commit
+                </td>
+                <td>
+                  <span class="mono">.eslintrc.json</span>, <span class="mono">.prettierrc</span>,
+                  <span class="mono">package.json</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Make CI fail on lint: <span class="mono">npm run lint && npm test</span> in
+                  <span class="mono">ci.yml</span>
+                </td>
+                <td><span class="mono">.github/workflows/ci.yml</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" id="p1">
+        <h2>
+          <span class="icon">🟠</span> P1 — High — you can demo without them, but they cost 10–15
+          points each
+        </h2>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-1</span> Collector-as-API polling & webhook is stubs-only
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">triggerViaRest</span> returns an envelope but there is
+            <b>no polling loop</b> (<span class="mono">GET /dca/get_progress</span> / webhook
+            handler), no <span class="mono">collection_id</span> tracking, no consumption of
+            delivered snapshot into store. §5 of ScrapeVerse spec expects async handling. Currently
+            heartbeat fires and forgets.
+          </p>
+          <ul>
+            <li>
+              Add <span class="mono">GET /api/dca/poll?collection_id=col_yyy</span> that polls
+              Bright Data until <span class="mono">status: ready</span>, then validates and upserts.
+            </li>
+            <li>
+              Add <span class="mono">POST /api/webhooks/brightdata</span> for push delivery (HMAC
+              verify).
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-2</span> API routes are unauthenticated — anyone can
+            <span class="mono">POST /scrapers/:id/break</span>
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            No <span class="mono">x-api-key</span> / NextAuth / middleware gate. At demo, a heckler
+            can break your scraper mid-pitch. Spider-Sense “reliability” ding.
+          </p>
+          <table class="table" style="margin-top: 8px">
+            <thead>
+              <tr>
+                <th>Severity for hackathon</th>
+                <th>Fix (15 min)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Medium — not a DQ, but judges notice
+                  <span class="mono">// TODO auth</span> absence. Better to ship simple admin key
+                  than pretend it’s done.
+                </td>
+                <td>
+                  Add <span class="mono">middleware.ts</span> checking
+                  <span class="mono">Authorization: Bearer $DASHBOARD_API_KEY</span> for
+                  <span class="mono">POST /api/scrapers/*</span>; document in
+                  <span class="mono">.env.example</span>.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-3</span> <span class="mono">validate.mjs</span> hardcoded to
+            one Collector
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">requiredFields = ['company','count','date']</span> — running it after
+            a <span class="mono">c_llm_benchmarks_live</span> run (fields
+            <span class="mono">modelName, params, mmluScore</span>) always fails. CI
+            <span class="mono">validate.mjs</span> must be collector-aware. Add
+            <span class="mono">--collector</span> flag reading schema from
+            <span class="mono">store.getScraper(schema)</span> or a
+            <span class="mono">collectors/*.json</span> map.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-4</span> No rate-limit / CAPTCHA budget visibility beyond
+            logs
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            Healer logs mention 429/5xx but dashboard has no “proxy pool health” or “credit burn
+            rate” sparkline. PRD non-functional requirement says healing &lt;60s init — metric never
+            shown. Add to <span class="mono">Header</span> / dedicated
+            <span class="mono">/api/metrics</span> field:
+            <span class="mono">proxyPoolStatus, creditBurnToday, avgHealMs</span>.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-5</span> Idempotency & dedupe missing — re-runs duplicate DB
+            rows
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">store.runScraper</span> does <span class="mono">runs.push</span> +
+            <span class="mono">INSERT OR REPLACE by run.id</span> but not
+            <b>upsert by <span class="mono">sku/url</span></b
+            >. 100 cron runs = 100× duplicate rows. Spider-Sense checklist item explicitly: “upsert
+            by <span class="mono">sku/url</span> key”.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-6</span> Fallback selector chain not real — heal is string
+            replacement, not heuristic
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            <span class="mono">generateRepairedSelector</span> is
+            <span class="mono">if(field.includes('company')) return 'span[data-company-name]'</span>
+            — mocked, not DOM-aware. No CSS → XPath → <span class="mono">data-testid</span> →
+            text-regex fallback chain, no DOM diff against
+            <span class="mono">fixtures/before.html</span> vs
+            <span class="mono">after-redesign.html</span> sibling. Adversarial test passes only
+            because it tests the mock, not the real DOM. Judges will ask “show the selector chain
+            config”.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="h3">
+            <span class="pill high">P1-7</span> Missing Daily Bugle package — LinkedIn post, DEV.to,
+            video script
+          </div>
+          <p style="margin: 6px 0 0; color: var(--muted); font-size: 13px">
+            Hackathon Submission Strategy (§26) expects a LinkedIn post draft, DEV.to article, and
+            3-min pitch outline. <span class="mono">docs/HACKATHON_SUBMISSION_STRATEGY.md</span> is
+            a template only. No <span class="mono">docs/LINKEDIN_POST.md</span>, no
+            <span class="mono">docs/VIDEO_SCRIPT.md</span>, no cover image.
+          </p>
+        </div>
+      </div>
+
+      <div class="section" id="p2">
+        <h2>
+          <span class="icon">🟡</span> P2 — Medium — win the craft points that separate 1st from 3rd
+        </h2>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 34%">Gap</th>
+                <th>Why it matters (§ reference)</th>
+                <th style="width: 140px">Fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>No CONTRIBUTING.md / LICENSE</b></td>
+                <td>
+                  Spider-Sense §19 “Contributability 15%” — judges check for OSS hygiene on clone.
+                </td>
+                <td><span class="pill med">30 min</span> Add both</td>
+              </tr>
+              <tr>
+                <td><b>Duplicate Tailwind configs</b></td>
+                <td>
+                  <span class="mono">tailwind.config.cjs</span> +
+                  <span class="mono">tailwind.config.js</span> +
+                  <span class="mono">postcss.config.cjs/.js</span> duplicates — confuses build,
+                  signals sloppy scaffold.
+                </td>
+                <td>Delete <span class="mono">.cjs</span> keeps <span class="mono">.js</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>README <span class="mono">file://</span> links</b>
+                </td>
+                <td>
+                  <span class="mono">file:///Users/jay/Documents/...</span> in README renders broken
+                  on GitHub. Use relative <span class="mono">./COMPLIANCE.md</span>.
+                </td>
+                <td>Fix links</td>
+              </tr>
+              <tr>
+                <td><b>No .nvmrc / engines</b></td>
+                <td>
+                  CI uses Node 20, README says 18+, but no pinned version — fresh clone drift.
+                </td>
+                <td>
+                  <span class="mono">.nvmrc</span> + <span class="mono">engines</span> in
+                  package.json
+                </td>
+              </tr>
+              <tr>
+                <td><b>No Dockerfile / compose</b></td>
+                <td>
+                  PRD mentions PostgreSQL prod — no container to reproduce. Judges running
+                  <span class="mono">docker compose up</span> will fail.
+                </td>
+                <td>
+                  Add <span class="mono">Dockerfile</span> + <span class="mono">compose.yml</span>
+                </td>
+              </tr>
+              <tr>
+                <td><b>No Playwright E2E</b></td>
+                <td>
+                  104 unit tests, 0 E2E —
+                  <span class="mono">BreakSimulator → Run Broken → Heal → Approve → Verified</span>
+                  flow untested headless.
+                </td>
+                <td><span class="mono">tests/e2e/heal.spec.ts</span></td>
+              </tr>
+              <tr>
+                <td><b>Header hardcodes fallback</b></td>
+                <td>
+                  <span class="mono">Header.tsx</span> defaults
+                  <span class="mono">4850</span> before fetch resolves — flickers; better skeleton +
+                  live badge.
+                </td>
+                <td><span class="mono">isLive</span> prop already exists — wire it</td>
+              </tr>
+              <tr>
+                <td><b>No historical chart</b></td>
+                <td>
+                  MetricCards shows snapshot, not sparkline — “data freshness signal” Suit-Up 10%
+                  wants trend.
+                </td>
+                <td>Add Recharts sparkline in <span class="mono">DataExplorer</span></td>
+              </tr>
+              <tr>
+                <td><b>No Slack/webhook notification</b></td>
+                <td>
+                  Brief §16 Best Practice 5: “Connect to cron, DB, <i>agent, dashboard</i>” — no
+                  outbound notification for heal events.
+                </td>
+                <td><span class="mono">POST $SLACK_WEBHOOK</span> on heal/approve</td>
+              </tr>
+              <tr>
+                <td><b>ScraperMatrix not paginated</b></td>
+                <td>Works for 3, but PRD “Should Have: &gt;10 scrapers” would overflow.</td>
+                <td>Pagination or virtual</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" id="p3">
+        <h2><span class="icon">⚪</span> Polish — nice to have, do after P0–P2</h2>
+        <div class="card">
+          <ul>
+            <li>OG image + favicon for link unfurl (Daily Bugle sharing).</li>
+            <li>
+              404/500 pages, loading skeleton, empty-state for 0 scrapers (Suit-Up
+              “loading/empty/error states” 35%).
+            </li>
+            <li>Analytics (Vercel Analytics / PostHog) to prove usage in pitch.</li>
+            <li>
+              Search scraper type demo (keyword → Search collector) for Hybrid B moonshot —
+              currently only Discovery/PDP implied.
+            </li>
+            <li>
+              Replace <span class="mono">Math.random()</span> IDs with
+              <span class="mono">nanoid</span>/UUID for run/heal events.
+            </li>
+            <li>
+              A11y audit — terminal low-contrast fails WCAG on
+              <span class="mono">LiveTerminal</span>.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section" id="scorecard">
+        <h2><span class="icon">🏆</span> Scorecard — where you stand vs ScrapeVerse judging</h2>
+        <div class="card">
+          <div class="h3">
+            Grand Prize — Web-Slinger — Best Use of Bright Data — NVIDIA DGX Spark $5k
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Criterion (weight)</th>
+                <th>Signal for 90–100</th>
+                <th>Your status</th>
+                <th>Points leaving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>1. Self-Healing & Resilience</b> — 30%</td>
+                <td>
+                  Live site change →
+                  <span class="mono">heal "price now span[data-testid=price]"</span> → same
+                  <span class="mono">c_*</span> → data flows
+                </td>
+                <td>
+                  <span class="pill med">~65%</span> Engine real, but no recorded 5-act video, no
+                  auto-heal proof in Actions wall (never triggered live)
+                </td>
+                <td class="cross">−10 pts</td>
+              </tr>
+              <tr>
+                <td><b>2. Drive From Coding Agent</b> — 25%</td>
+                <td>Terminal NL → agent tool → Collector → streamed JSON → reasoning</td>
+                <td>
+                  <span class="pill high">~45%</span> CLAUDE.md exists, code is terminal-first, but
+                  <b>no recording, no co-authored git, no prompt log</b>
+                </td>
+                <td class="cross">−14 pts</td>
+              </tr>
+              <tr>
+                <td><b>3. Build in Studio</b> — 25%</td>
+                <td>
+                  Custom Collector on long-tail, typed schema, pagination/JS, Studio screenshot +
+                  <span class="mono">c_*</span>
+                </td>
+                <td>
+                  <span class="pill med">~60%</span> Long-tail chosen correctly, schema typed &
+                  Zod’d, but <b>no Studio screenshot/real ID/marketplace 0-results proof</b>
+                </td>
+                <td class="cross">−10 pts</td>
+              </tr>
+              <tr>
+                <td><b>4. Build WITH Output</b> — 20%</td>
+                <td>
+                  Collector as API (<span class="mono">fetch POST /dca/trigger</span>) → DB →
+                  diff/alert/viz → real use-case
+                </td>
+                <td>
+                  <span class="pill ok">~75%</span> API wired, SQLite, dashboard consumes it, MTTR
+                  24.5s metric
+                </td>
+                <td class="cross">−5 pts</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout warn" style="margin-top: 10px">
+            <b>Grand Prize projected: 59–63 / 100 today → 84–89 / 100 after P0s.</b> P0-1..P0-5 each
+            recover ~3–6 pts; together they flip you from “nice self-heal prototype” to “thesis
+            proven”.
+          </div>
+        </div>
+
+        <div class="cols2">
+          <div class="card">
+            <div class="h3">Suit-Up — Best UI — iPad per member</div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Criterion (weight)</th>
+                  <th>Your status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Finished feel (35%)</td>
+                  <td>
+                    <span class="pill high">BLOCKED</span> Dark control center is polished locally —
+                    but <b>no URL</b> per §9.2. Judges grade URL on phone: 0 without it.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Data intelligibility (25%)</td>
+                  <td>
+                    <span class="pill ok">~80%</span> MetricCards + DiffViewer + DataExplorer +
+                    LiveTerminal with filter pills — strong.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Interaction (20%)</td>
+                  <td>
+                    <span class="pill ok">~75%</span> BreakSimulator 3-step flow is demoable;
+                    judge-mode copy good.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Freshness signal (10%)</td>
+                  <td>
+                    <span class="pill med">~50%</span> <span class="mono">lastRunAt</span> shown,
+                    but no <span class="mono">healed at 14:03</span> badge or live poll indicator.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Aesthetic (10%)</td>
+                  <td>
+                    <span class="pill ok">~85%</span> Cyberpunk theme consistent, glass-panel + glow
+                    tokens.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="h3">Spider-Sense — Best Clean Code — Keychron per member</div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Criterion (weight)</th>
+                  <th>Your status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Reliability / Edge cases (30%)</td>
+                  <td>
+                    <span class="pill ok">~80%</span> Zod everywhere, timeout, 402/429, heal lock,
+                    idempotent break — tests hammer it. Missing 429 backoff + dedupe.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Structure (25%)</td>
+                  <td>
+                    <span class="pill ok">~78%</span>
+                    <span class="mono">lib/brightdata → store → api → components</span> clean;
+                    endpoint duplication (heal/approve/run/break share zod boilerplate — extract
+                    helper).
+                  </td>
+                </tr>
+                <tr>
+                  <td>Readability (20%)</td>
+                  <td>
+                    <span class="pill med">~62%</span> Typed, intent names, but
+                    <b>no ESLint/Prettier/JSDoc</b>; duplicated Tailwind configs.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Contributability (15%)</td>
+                  <td>
+                    <span class="pill high">~40%</span> No CONTRIBUTING.md, no LICENSE, no lint
+                    gate, no E2E, fixtures exist but not wired to
+                    <span class="mono">validate.mjs</span>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Documentation (10%)</td>
+                  <td>
+                    <span class="pill ok">~85%</span> README is strong, COMPLIANCE.md is excellent —
+                    fix <span class="mono">file://</span> links.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 12px">
+          <div class="h3">Daily Bugle — Best LinkedIn Post — Galaxy Watch</div>
+          <p style="color: var(--muted); font-size: 13px; margin: 0 0 8px">
+            Judged by community/marketing — story angle (35%) + mandatory tag (20%) + visual (20%).
+          </p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Story (pain → long-tail → heal → quantized insight)</td>
+                <td><span class="pill fail">MISSING</span> No draft exists</td>
+              </tr>
+              <tr>
+                <td>Must <b>@WeMakeDevs</b> on LinkedIn (company page select, not plain text)</td>
+                <td><span class="cross">Not posted</span></td>
+              </tr>
+              <tr>
+                <td>Visual proof (30s native video: terminal → logs → chart)</td>
+                <td><span class="cross">No video cut</span></td>
+              </tr>
+              <tr>
+                <td>Quantified value (“1,200 products hourly, $X delta”)</td>
+                <td><span class="cross">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout info" style="margin-top: 10px">
+            <b>Window to maximize EV:</b> Post Aug 18–22 9–11am IST, not night of 23rd. Teammates
+            comment within 30 min. Cross-post to X for discoverability but only LinkedIn counts.
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="prod">
+        <h2>
+          <span class="icon">🚀</span> Production readiness — will it survive fresh clone & deploy?
+        </h2>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>Result</th>
+                <th>Needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="mono">npm ci && npm test</span></td>
+                <td><span class="pill ok">PASS</span> 104/104, 742ms</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><span class="mono">npm run build</span></td>
+                <td>
+                  <span class="pill med">PASS w/ WARN</span> “Can’t resolve
+                  <span class="mono">better-sqlite3</span>” — Next bundles server route that
+                  lazy-requires native addon
+                </td>
+                <td>
+                  Make require optional; add
+                  <span class="mono">serverExternalPackages: ['better-sqlite3']</span> to
+                  <span class="mono">next.config.mjs</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="mono">npm run lint</span></td>
+                <td>
+                  <span class="pill high">WEAK PASS</span> Runs but enforces ~0 rules — no config
+                </td>
+                <td>
+                  Add <span class="mono">.eslintrc.json</span> +
+                  <span class="mono">.prettierrc</span> + CI gate
+                </td>
+              </tr>
+              <tr>
+                <td>Fresh clone → <span class="mono">npm ci && npm run dev</span></td>
+                <td>
+                  <span class="pill ok">PASS</span> Works in mock mode (<span class="mono"
+                    >ALLOW_MOCK_FALLBACK=true</span
+                  >)
+                </td>
+                <td>
+                  Document that <span class="mono">BRIGHT_DATA_API_KEY</span> not needed for demo
+                </td>
+              </tr>
+              <tr>
+                <td>Deploy to Vercel</td>
+                <td>
+                  <span class="pill fail">WILL LOSE DATA</span> Native addon +
+                  <span class="mono">data/*.db</span> ephemeral + gitignored
+                </td>
+                <td>P0-6: Postgres/Turso adapter</td>
+              </tr>
+              <tr>
+                <td>Deploy to Render/Railway with Docker</td>
+                <td><span class="pill fail">NO DOCKERFILE</span></td>
+                <td>P2: add <span class="mono">Dockerfile</span></td>
+              </tr>
+              <tr>
+                <td>Secret hygiene</td>
+                <td>
+                  <span class="pill ok">PASS</span> <span class="mono">.env</span> gitignored,
+                  <span class="mono">.env.example</span> placeholders,
+                  <span class="mono">git log -p | grep brd_</span> empty,
+                  <span class="mono">BRIGHT_DATA_API_KEY</span> never leaves server
+                </td>
+                <td>Rotate if ever screenshared</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" id="security">
+        <h2><span class="icon">🔒</span> Security & compliance audit</h2>
+        <div class="cols2">
+          <div class="card">
+            <div class="h3">✅ Done well</div>
+            <ul>
+              <li>
+                <span class="mono">.env</span> + <span class="mono">.env*.local</span> +
+                <span class="mono">*.db</span> in <span class="mono">.gitignore</span>;
+                <span class="mono">.env.example</span> is placeholders only — test asserts.
+              </li>
+              <li>
+                <span class="mono">BRIGHT_DATA_API_KEY</span> server-only: no client component
+                imports it (test asserts); Bearer header server-side only.
+              </li>
+              <li>
+                All <span class="mono">POST /api/scrapers/:id/*</span> validate via
+                <span class="mono">zod</span> regex, reject <span class="mono">../</span>,
+                <span class="mono">;</span>, injection payloads; CLI args escaped via
+                <span class="mono">escapeArg</span>.
+              </li>
+              <li>
+                <span class="mono">COMPLIANCE.md</span> certifies zero PII,
+                <span class="mono">robots.txt</span> respect (6h heartbeat), 7-day retention, credit
+                economics — best in cohort.
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="h3">⚠️ Gaps</div>
+            <ul>
+              <li>
+                No auth on mutate routes — add simple
+                <span class="mono">DASHBOARD_API_KEY</span> middleware before public deploy.
+              </li>
+              <li>
+                <span class="mono">Header.tsx</span> logs budget to console in dev — strip or mask.
+              </li>
+              <li>
+                No HMAC on webhook (P1-1) — add
+                <span class="mono">X-Brightdata-Signature</span> verify when you add webhook.
+              </li>
+              <li>
+                <span class="mono">generateMockExtractedData</span> contains extra field
+                <span class="mono">source: 'SEC Filing'</span> not in schema — validator ignores
+                extras but docs promise exact schema; align mock to schema.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="terminal">
+        <h2><span class="icon">🖥️</span> Terminal-first & Collector-as-API — rubric deep dive</h2>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 22%">Spec (§)</th>
+                <th>Requirement</th>
+                <th>You today</th>
+                <th style="width: 90px">Fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>§4 CLI 6-step</td>
+                <td>
+                  <span class="mono">npx -p @brightdata/cli</span> →
+                  <span class="mono">login → create → run → heal → approve</span> with same
+                  <span class="mono">c_*</span>
+                </td>
+                <td>
+                  <span class="mono">create/run/heal/approve</span> all coded;
+                  <span class="mono">create</span> never shown with NL prompt;
+                  <span class="mono">approve --reject</span> example undocumented
+                </td>
+                <td><span class="pill high">Doc it</span></td>
+              </tr>
+              <tr>
+                <td>§5 Collector lifecycle</td>
+                <td>
+                  <span class="mono">c_*</span> env-var, never hardcoded,
+                  <span class="mono">POST /dca/trigger?collector=c_xxx</span> programmatic, response
+                  has <span class="mono">collection_id</span>
+                </td>
+                <td>
+                  Env fallback exists but hardcode is default; trigger is wired but
+                  <b>no poll/webhook</b>; <span class="mono">collection_id</span> never handled
+                </td>
+                <td><span class="pill high">Poll</span></td>
+              </tr>
+              <tr>
+                <td>§6 Infra split</td>
+                <td>
+                  Don’t rebuild proxies/browser/CAPTCHA — delegate to Bright Data, focus on healing
+                  + product
+                </td>
+                <td>
+                  <span class="check">✔</span> Correctly delegates; no
+                  <span class="mono">playwright/cheerio</span> DIY scrape
+                </td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>§7 Terminal as UI</td>
+                <td>
+                  Agent terminal drives all <span class="mono">bdata</span>; dashboard only verifies
+                  ID + sets schedule (±2×)
+                </td>
+                <td>
+                  <span class="mono">brightdata.ts</span> does; docs say it;
+                  <b>evidence missing</b> (cast, git trailers)
+                </td>
+                <td><span class="pill crit">Record</span></td>
+              </tr>
+              <tr>
+                <td>§16 Long-tail</td>
+                <td>Why not prebuilt? 800+ prebuilts — prove 0-results for your URL</td>
+                <td>
+                  Target choice defensible (layoffs.fyi / HF / HN jobs) but <b>no screenshot</b>
+                </td>
+                <td><span class="pill crit">Screenshot</span></td>
+              </tr>
+              <tr>
+                <td>§17 Public only</td>
+                <td>
+                  Incognito-verifiable, no login/paywall/PII,
+                  <span class="mono">robots.txt Allow</span> cited
+                </td>
+                <td>
+                  <span class="check">✔</span> COMPLIANCE.md cites all 3
+                  <span class="mono">robots.txt</span> + zero-PII table
+                </td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>§18 Secrets</td>
+                <td>
+                  <span class="mono">.env</span> ignored,
+                  <span class="mono">.env.example</span> placeholders, token never in client, CI
+                  uses <span class="mono">secrets.*</span>
+                </td>
+                <td>
+                  <span class="check">✔</span> Passes <span class="mono">gitleaks</span> shape; add
+                  audit to <span class="mono">ci.yml</span>
+                </td>
+                <td><span class="pill low">Add scan</span></td>
+              </tr>
+              <tr>
+                <td>§21 State machine</td>
+                <td>
+                  <span class="mono">healing → awaiting_approval → recovered</span> gated;
+                  downstream same <span class="mono">c_*</span>;
+                  <span class="mono">--reject</span> path exists
+                </td>
+                <td>
+                  <span class="check">✔</span> State machine correct; untested:
+                  <span class="mono">--reject</span> handler does not revert selectors (acceptable —
+                  docs as manual retry)
+                </td>
+                <td><span class="pill low">Doc</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" id="plan">
+        <h2>
+          <span class="icon">🗺️</span> Prioritized action plan — do in this order, ship by Aug 23
+        </h2>
+        <div class="card">
+          <div class="h3">Next 6 hours — unblock winning (P0s)</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 44px">#</th>
+                <th>Action</th>
+                <th>Owner</th>
+                <th style="width: 90px">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>
+                  <b>Deploy</b> — <span class="mono">npx vercel --prod</span>, set
+                  <span class="mono">BRIGHT_DATA_API_KEY</span> in Vercel env, fix
+                  <span class="mono">next.config.mjs</span> for
+                  <span class="mono">better-sqlite3</span> external, add URL badge to README.
+                </td>
+                <td>Pilot</td>
+                <td>~40m</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>
+                  <b>Fix heartbeat + validate</b> — rewrite
+                  <span class="mono">scripts/heartbeat.mjs</span> to write
+                  <span class="mono">data/latest-run.json</span> + invoke
+                  <span class="mono">validate.mjs</span> with per-collector schema + proper 5xx/429
+                  branching. Test:
+                  <span class="mono">node scripts/heartbeat.mjs; echo $?</span> with mocked empty
+                  payload should exit 1.
+                </td>
+                <td>Engineer</td>
+                <td>~60m</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>
+                  <b>Add lint gate</b> — <span class="mono">eslint-config-next + prettier</span>,
+                  <span class="mono">.eslintrc.json</span>, <span class="mono">.prettierrc</span>,
+                  <span class="mono">npm run lint</span> in <span class="mono">ci.yml</span> (fail
+                  on error).
+                </td>
+                <td>Engineer</td>
+                <td>~25m</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>
+                  <b>Collector proof</b> — create one live Collector (even on free tier), screenshot
+                  Studio ID + schema + Catalog 0-results for 1 target. Commit to
+                  <span class="mono">collectors/</span>.
+                </td>
+                <td>Pilot</td>
+                <td>~30m</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>
+                  <b>Terminal evidence</b> —
+                  <span class="mono">asciinema rec docs/terminal.cast</span> (90s) + add 3
+                  co-authored commits (<span class="mono">Co-Authored-By: Claude</span>), embed GIF
+                  in README.
+                </td>
+                <td>Pilot</td>
+                <td>~30m</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>
+                  <b>Persistence adapter</b> — add Postgres fallback for
+                  <span class="mono">DATABASE_URL=postgres://</span> (or gate to file-mode note:
+                  “Demo persistence is file-local; production uses Postgres — see
+                  <span class="mono">docs/SYSTEM_ARCHITECTURE.md</span>” if you truly defer).
+                </td>
+                <td>Engineer</td>
+                <td>~45m</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="h3">Next 24 hours — recover 15–20 judging points (P1s)</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 44px">#</th>
+                <th>Action</th>
+                <th style="width: 90px">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>7</td>
+                <td>
+                  Polling/webhook stub for <span class="mono">/dca/trigger</span> — at least
+                  document <span class="mono">collection_id</span> handling + add
+                  <span class="mono">GET /api/dca/poll</span> stub that validates.
+                </td>
+                <td>~45m</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>
+                  Simple auth on <span class="mono">POST /api/scrapers/*</span> (<span class="mono"
+                    >DASHBOARD_API_KEY</span
+                  >
+                  header).
+                </td>
+                <td>~15m</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>
+                  Make <span class="mono">validate.mjs</span> collector-aware (<span class="mono"
+                    >--collector</span
+                  >
+                  + read schema from <span class="mono">collectors/*.json</span>).
+                </td>
+                <td>~20m</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>
+                  Record 5-act Loom (5:30) per shot list above; upload, link in README +
+                  <span class="mono">docs/VIDEO_SCRIPT.md</span>.
+                </td>
+                <td>~90m</td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td>
+                  Draft LinkedIn post (see §26 template) + schedule for Aug 20 09:30 IST, tag
+                  <b>@WeMakeDevs</b> + <b>@Bright Data</b>, hashtags
+                  <span class="mono">#ScrapeVerse #WeMakeDevs #BrightData</span>.
+                </td>
+                <td>~30m</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="h3">Before submission — craft (P2 + polish)</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 44px">#</th>
+                <th>Action</th>
+                <th style="width: 90px">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>12</td>
+                <td>
+                  Add <span class="mono">CONTRIBUTING.md</span>,
+                  <span class="mono">LICENSE</span> (MIT), <span class="mono">.nvmrc</span>, fix
+                  duplicate Tailwind configs, fix README <span class="mono">file://</span> links.
+                </td>
+                <td>~20m</td>
+              </tr>
+              <tr>
+                <td>13</td>
+                <td>
+                  Add one Playwright E2E for heal flow; add <span class="mono">gitleaks</span>/<span
+                    class="mono"
+                    >trufflehog</span
+                  >
+                  step to CI.
+                </td>
+                <td>~45m</td>
+              </tr>
+              <tr>
+                <td>14</td>
+                <td>
+                  Add freshness sparkline + <span class="mono">healed at</span> badge + Slack
+                  webhook env.
+                </td>
+                <td>~45m</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout good" style="margin-top: 12px">
+            <b>Bottom line:</b> You built the hard part (state machine + CLI envelope + tests). The
+            remaining P0s are <i>evidence + deploy</i> — not invention. Fix heartbeat, deploy,
+            record, add lint. That’s 6 hours to go from “impressive local demo” to “Grand Prize
+            contender the judges can click”.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2><span class="icon">📦</span> Appendix — file map & where each missing fix lives</h2>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Status</th>
+                <th>Missing / action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">src/lib/brightdata.ts</td>
+                <td><span class="pill ok">STRONG</span></td>
+                <td>Minor: add <span class="mono">--reject</span> handler parity note.</td>
+              </tr>
+              <tr>
+                <td class="mono">src/lib/store.ts</td>
+                <td><span class="pill ok">STRONG</span></td>
+                <td>P1-5 dedupe; P0-6 Postgres adapter; align mock data to schemas.</td>
+              </tr>
+              <tr>
+                <td class="mono">src/lib/types.ts</td>
+                <td><span class="pill ok">OK</span></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td class="mono">app/page.tsx</td>
+                <td><span class="pill ok">OK</span></td>
+                <td>Add loading/empty for 0 scrapers.</td>
+              </tr>
+              <tr>
+                <td class="mono">components/*</td>
+                <td><span class="pill ok">OK</span></td>
+                <td>Add historical sparkline.</td>
+              </tr>
+              <tr>
+                <td class="mono">app/api/**</td>
+                <td><span class="pill ok">STRONG</span></td>
+                <td>Add auth gate (P1-2).</td>
+              </tr>
+              <tr>
+                <td class="mono">scripts/heartbeat.mjs</td>
+                <td><span class="pill fail">REWRITE</span></td>
+                <td>P0-5 rewrite — see spec above.</td>
+              </tr>
+              <tr>
+                <td class="mono">scripts/validate.mjs</td>
+                <td><span class="pill med">NEEDS FIX</span></td>
+                <td>P1-3 collector-aware.</td>
+              </tr>
+              <tr>
+                <td class="mono">.github/workflows/scraper-heal.yml</td>
+                <td><span class="pill med">OK–</span></td>
+                <td>P0-5 fix trigger logic.</td>
+              </tr>
+              <tr>
+                <td class="mono">.github/workflows/ci.yml</td>
+                <td><span class="pill med">OK–</span></td>
+                <td>Add lint + gitleaks.</td>
+              </tr>
+              <tr>
+                <td class="mono">package.json</td>
+                <td><span class="pill med">NEEDS FIX</span></td>
+                <td>Add eslint/prettier/lint-staged/husky, engines.</td>
+              </tr>
+              <tr>
+                <td class="mono">.eslintrc.* / .prettierrc</td>
+                <td><span class="pill fail">MISSING</span></td>
+                <td>P0-7 create.</td>
+              </tr>
+              <tr>
+                <td class="mono">vercel.json / Dockerfile</td>
+                <td><span class="pill fail">MISSING</span></td>
+                <td>P0-1 / P2 create.</td>
+              </tr>
+              <tr>
+                <td class="mono">collectors/*.json</td>
+                <td><span class="pill fail">MISSING</span></td>
+                <td>P0-2 real collector export.</td>
+              </tr>
+              <tr>
+                <td class="mono">docs/terminal.cast</td>
+                <td><span class="pill fail">MISSING</span></td>
+                <td>P0-3 record.</td>
+              </tr>
+              <tr>
+                <td class="mono">docs/VIDEO_SCRIPT.md</td>
+                <td><span class="pill fail">MISSING</span></td>
+                <td>P0-4 write + Loom.</td>
+              </tr>
+              <tr>
+                <td class="mono">CONTRIBUTING.md / LICENSE</td>
+                <td><span class="pill fail">MISSING</span></td>
+                <td>P2 add.</td>
+              </tr>
+              <tr>
+                <td class="mono">COMPLIANCE.md / README.md</td>
+                <td><span class="pill ok">STRONG</span></td>
+                <td>Fix file:// links; add deployed URL badge.</td>
+              </tr>
+              <tr>
+                <td class="mono">tailwind.config.*</td>
+                <td><span class="pill med">DUPLICATE</span></td>
+                <td>Delete .cjs keep .js.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="color: var(--dim); font-size: 12px; margin-top: 12px">
+            Audit generated <span class="mono">2026-08-19</span> from branch
+            <span class="mono">main</span> at <span class="mono">ea6367d</span> · 104/104 tests
+            passing · build warning on better-sqlite3 noted. Re-run
+            <span class="mono">npm test && npm run build</span> after each P0 fix and keep this
+            report alongside
+            <span class="mono">docs/COMPREHENSIVE_ANALYSIS_AND_REMEDIATION_PLAN.md</span>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
