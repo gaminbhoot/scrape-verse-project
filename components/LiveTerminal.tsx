@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { LogEntry } from '@/src/lib/types';
-import { Terminal, Copy, Check, Filter } from 'lucide-react';
+import { Terminal, Copy, Check } from 'lucide-react';
 
 interface LiveTerminalProps {
   logs: LogEntry[];
@@ -12,112 +12,103 @@ export function LiveTerminal({ logs }: LiveTerminalProps) {
   const [filter, setFilter] = useState<string>('ALL');
   const [copied, setCopied] = useState(false);
 
-  const filteredLogs = logs.filter((log) => {
+  const filteredLogs = logs.filter(log => {
     if (filter === 'ALL') return true;
     return log.source === filter || log.level === filter.toLowerCase();
   });
 
   const handleCopyLogs = () => {
-    const text = filteredLogs
-      .map((l) => `[${l.timestamp}] [${l.source}] [${l.level.toUpperCase()}] ${l.message}`)
-      .join('\n');
+    const text = filteredLogs.map(l => `[${l.timestamp}] [${l.source}] [${l.level.toUpperCase()}] ${l.message}`).join('\n');
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="glass-panel rounded-2xl border border-slate-800 flex flex-col h-96 overflow-hidden">
-      {/* Terminal Titlebar */}
-      <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <div className="terminal-chrome flex h-[420px] flex-col overflow-hidden rounded-[18px]">
+      {/* chrome */}
+      <div className="flex items-center justify-between border-b border-white/[0.07] bg-white/[0.04] px-4 py-3 backdrop-blur">
+        <div className="flex items-center gap-2.5">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
-            <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
-            <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+            <span className="h-3 w-3 rounded-full bg-[#ff5f57] ring-1 ring-black/20" />
+            <span className="h-3 w-3 rounded-full bg-[#ffbd2e] ring-1 ring-black/20" />
+            <span className="h-3 w-3 rounded-full bg-[#28c840] ring-1 ring-black/20" />
           </div>
-          <span className="text-xs font-mono font-semibold text-slate-300 ml-2 flex items-center gap-1.5">
-            <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-            Bright Data & Aegis CLI Stream
+          <span className="ml-2 inline-flex items-center gap-1.5 font-mono text-[11px] font-medium tracking-wide text-white/70">
+            <Terminal className="h-3.5 w-3.5 text-[#c9a86a]" />
+            aegis — brightdata • zsh
+          </span>
+          <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[10px] text-white/40 sm:inline-flex">
+            {filteredLogs.length} lines
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Filter Pills */}
-          <div className="hidden sm:flex items-center gap-1 text-[11px] font-mono bg-slate-900 px-1.5 py-0.5 rounded-lg border border-slate-800">
-            {['ALL', 'CLI', 'ENGINE', 'HEALER', 'CI/CD'].map((f) => (
+          <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-black/20 p-1 font-mono text-[11px] sm:flex">
+            {['ALL', 'CLI', 'ENGINE', 'HEALER', 'CI/CD'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                  filter === f ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-slate-400 hover:text-white'
-                }`}
+                className={`rounded-full px-2 py-1 leading-none transition ${
+                  filter === f ? 'bg-white text-black font-semibold' : 'text-white/50 hover:text-white'
+                } cursor-pointer`}
               >
                 {f}
               </button>
             ))}
           </div>
-
           <button
             onClick={handleCopyLogs}
-            className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            title="Copy Logs"
+            className="grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white cursor-pointer"
+            title="Copy"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>
 
-      {/* Terminal Log Area */}
-      <div className="p-4 flex-1 overflow-y-auto font-mono text-xs space-y-1.5 bg-[#070b12]">
+      {/* logs */}
+      <div className="flex-1 overflow-y-auto bg-[#050a18] p-4 font-mono text-xs leading-relaxed">
         {filteredLogs.length === 0 ? (
-          <div className="text-slate-500 italic">No log stream output yet. Execute a collector to start logging.</div>
+          <div className="italic text-white/30">No stream yet — run a collector to start logging.</div>
         ) : (
-          filteredLogs.map((log) => {
-            const isError = log.level === 'error';
-            const isHeal = log.level === 'heal';
-            const isSuccess = log.level === 'success';
-
-            return (
-              <div key={log.id} className="leading-relaxed flex items-start gap-2">
-                <span className="text-slate-500 select-none text-[11px] flex-shrink-0">
-                  {new Date(log.timestamp).toLocaleTimeString()}
-                </span>
-                <span
-                  className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase flex-shrink-0 ${
-                    log.source === 'CLI'
-                      ? 'bg-cyan-950 text-cyan-400 border border-cyan-800/40'
-                      : log.source === 'HEALER'
-                      ? 'bg-amber-950 text-amber-400 border border-amber-800/40'
-                      : log.source === 'CI/CD'
-                      ? 'bg-indigo-950 text-indigo-400 border border-indigo-800/40'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800'
-                  }`}
-                >
-                  {log.source}
-                </span>
-
-                <span
-                  className={`break-all ${
-                    isError
-                      ? 'text-rose-400 font-semibold'
-                      : isHeal
-                      ? 'text-amber-300 font-medium'
-                      : isSuccess
-                      ? 'text-emerald-400'
-                      : 'text-slate-300'
-                  }`}
-                >
-                  {log.message}
-                </span>
-              </div>
-            );
-          })
+          <div className="space-y-1.5">
+            {filteredLogs.map(log => {
+              const isError = log.level === 'error';
+              const isHeal = log.level === 'heal';
+              const isSuccess = log.level === 'success';
+              return (
+                <div key={log.id} className="flex gap-2">
+                  <span className="shrink-0 select-none text-[11px] text-white/25">
+                    {new Date(log.timestamp).toLocaleTimeString()}
+                  </span>
+                  <span
+                    className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-bold tracking-wide ${
+                      log.source === 'CLI'
+                        ? 'border-cyan-500/20 bg-cyan-500/10 text-cyan-300'
+                        : log.source === 'HEALER'
+                          ? 'border-amber-500/20 bg-amber-500/10 text-amber-200'
+                          : log.source === 'CI/CD'
+                            ? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-300'
+                            : 'border-white/10 bg-white/[0.04] text-white/50'
+                    }`}
+                  >
+                    {log.source}
+                  </span>
+                  <span
+                    className={`break-all ${isError ? 'font-semibold text-rose-300' : isHeal ? 'text-amber-200' : isSuccess ? 'text-emerald-300' : 'text-white/70'}`}
+                  >
+                    {log.message}
+                  </span>
+                </div>
+              );
+            })}
+            <div className="flex items-center gap-1 pt-2 text-white/30">
+              <span>›</span>
+              <span className="h-4 w-1.5 bg-[#c9a86a] animate-cursor" />
+            </div>
+          </div>
         )}
-        <div className="flex items-center gap-1 text-slate-500 pt-2">
-          <span>&gt;</span>
-          <span className="w-2 h-4 bg-emerald-400 inline-block animate-cursor"></span>
-        </div>
       </div>
     </div>
   );

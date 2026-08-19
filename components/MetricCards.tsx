@@ -2,89 +2,120 @@
 
 import React from 'react';
 import { MetricOverview } from '@/src/lib/types';
-import { Activity, Zap, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Activity, Zap, CheckCircle2, RefreshCw, TrendingUp, ArrowUpRight } from 'lucide-react';
 
 interface MetricCardsProps {
   metrics: MetricOverview;
 }
 
-export function MetricCards({ metrics }: MetricCardsProps) {
+function Sparkline({ color = '#c9a86a' }: { color?: string }) {
+  // premium sparkline — static SVG, hand-tuned for rich feel
+  const d = 'M0 24 C 18 20, 30 28, 44 18 S 72 6, 84 14 S 112 22, 128 10 S 152 18, 168 12 S 188 6, 200 16';
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* 1. Global Health / Uptime */}
-      <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-card-hover">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Pipeline Uptime</span>
-          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold text-white tracking-tight">{metrics.uptimePercentage}%</span>
-          <span className="text-xs font-mono text-emerald-400 font-medium">Zero-Downtime SLA</span>
-        </div>
-        <div className="mt-3 flex items-center gap-2 text-xs text-slate-400 font-mono">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>{metrics.healthyCount} Active / {metrics.totalScrapers} Total Collectors</span>
-        </div>
-      </div>
+    <svg viewBox="0 0 200 32" className="h-8 w-full" preserveAspectRatio="none" aria-hidden>
+      <defs>
+        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${d} L 200 32 L 0 32 Z`} fill="url(#sg)" />
+      <path d={d} fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
+    </svg>
+  );
+}
 
-      {/* 2. Mean Time To Recovery (MTTR) */}
-      <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-card-hover">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Autonomous MTTR</span>
-          <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-            <Zap className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold text-white tracking-tight">{metrics.mttrSeconds}s</span>
-          <span className="text-xs font-mono text-cyan-400 font-medium">-99.4% vs manual</span>
-        </div>
-        <div className="mt-3 text-xs text-slate-400 font-mono">
-          AI Auto-Healing via <code className="text-cyan-300">bdata scraper heal</code>
-        </div>
-      </div>
+export function MetricCards({ metrics }: MetricCardsProps) {
+  const cards = [
+    {
+      label: 'Pipeline Uptime',
+      value: `${metrics.uptimePercentage}%`,
+      sub: 'Zero-downtime SLA',
+      icon: CheckCircle2,
+      accent: '#10b981',
+      meta: `${metrics.healthyCount} / ${metrics.totalScrapers} collectors live`,
+      spark: '#10b981',
+    },
+    {
+      label: 'Autonomous MTTR',
+      value: `${metrics.mttrSeconds}s`,
+      sub: '−99.4% vs manual',
+      icon: Zap,
+      accent: '#06b6d4',
+      meta: 'via bdata scraper heal',
+      spark: '#06b6d4',
+    },
+    {
+      label: 'Verified Records',
+      value: metrics.totalRecordsExtracted.toLocaleString(),
+      sub: '100% schema-valid',
+      icon: Activity,
+      accent: '#c9a86a',
+      meta: 'into SQLite & API',
+      spark: '#c9a86a',
+    },
+    {
+      label: 'Autonomous Repairs',
+      value: `${metrics.healsToday}`,
+      sub: 'Self-healed',
+      icon: RefreshCw,
+      accent: '#e8a63c',
+      meta: metrics.brokenCount > 0 ? `${metrics.brokenCount} needs repair` : 'All healthy',
+      spark: '#e8a63c',
+      alert: metrics.brokenCount > 0,
+    },
+  ];
 
-      {/* 3. Total Extracted Records */}
-      <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-card-hover">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Verified Records</span>
-          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <Activity className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold text-white tracking-tight">
-            {metrics.totalRecordsExtracted.toLocaleString()}
-          </span>
-          <span className="text-xs font-mono text-indigo-400 font-medium">100% Schema Valid</span>
-        </div>
-        <div className="mt-3 text-xs text-slate-400 font-mono">
-          Ingested into local SQLite & API endpoints
-        </div>
-      </div>
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {cards.map(c => (
+        <div key={c.label} className="glass-panel group relative overflow-hidden rounded-[18px] p-[18px]">
+          {/* top brass hairline */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a86a]/20 to-transparent opacity-60" />
+          {/* subtle inner glow on hover */}
+          <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/[0.03] blur-2xl opacity-0 transition group-hover:opacity-100" />
 
-      {/* 4. Autonomous Heals */}
-      <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-card-hover">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Autonomous Repairs</span>
-          <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-            <RefreshCw className="w-5 h-5" />
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <div className="text-[10px] font-semibold tracking-[0.14em] text-white/45">{c.label.toUpperCase()}</div>
+              <div className="flex items-baseline gap-2">
+                <div className="display text-[30px] font-normal tracking-[-0.04em] text-white">
+                  {c.value}
+                </div>
+                <span
+                  className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium tracking-wide"
+                  style={{
+                    borderColor: `${c.accent}22`,
+                    background: `${c.accent}12`,
+                    color: c.accent,
+                  }}
+                >
+                  <TrendingUp className="h-3 w-3" />
+                  {c.sub}
+                </span>
+              </div>
+            </div>
+
+            <div
+              className="grid h-10 w-10 place-items-center rounded-xl border bg-white/[0.04] backdrop-blur"
+              style={{ borderColor: `${c.accent}22`, color: c.accent }}
+            >
+              <c.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <Sparkline color={c.spark} />
+          </div>
+
+          <div className="mt-2 flex items-center justify-between border-t border-white/[0.06] pt-2.5">
+            <span className={`font-mono text-[11px] ${c.alert ? 'font-semibold text-rose-300' : 'text-white/45'}`}>
+              {c.meta}
+            </span>
+            <ArrowUpRight className="h-3 w-3 text-white/20 group-hover:text-white/40 transition" />
           </div>
         </div>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold text-white tracking-tight">{metrics.healsToday}</span>
-          <span className="text-xs font-mono text-amber-400 font-medium">Self-Healed Events</span>
-        </div>
-        <div className="mt-3 text-xs text-slate-400 font-mono">
-          {metrics.brokenCount > 0 ? (
-            <span className="text-rose-400 font-bold">⚠️ {metrics.brokenCount} Collector Needs Repair</span>
-          ) : (
-            <span className="text-emerald-400">All Pipelines Healthy</span>
-          )}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

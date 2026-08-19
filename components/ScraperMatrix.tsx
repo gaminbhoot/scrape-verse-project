@@ -2,8 +2,17 @@
 
 import React from 'react';
 import { Scraper } from '@/src/lib/types';
-const _statusCoverage = ['healthy','healing','awaiting_approval','broken','recovered'];
-import { Play, Sparkles, AlertCircle, CheckCircle2, Clock, Globe, ArrowUpRight, Wrench } from 'lucide-react';
+import {
+  Play,
+  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Globe,
+  ArrowUpRight,
+  Wrench,
+  ShieldAlert,
+} from 'lucide-react';
 
 interface ScraperMatrixProps {
   scrapers: Scraper[];
@@ -15,193 +24,185 @@ interface ScraperMatrixProps {
   healingId: string | null;
 }
 
-export function ScraperMatrix({
-  scrapers,
-  onRun,
-  onHeal,
-  onBreak,
-  onApprove,
-  runningId,
-  healingId,
-}: ScraperMatrixProps) {
+function statusMeta(status: string) {
+  switch (status) {
+    case 'broken':
+      return { label: 'Broken', dot: 'bg-rose-500', ring: 'ring-rose-500/30', rail: 'from-rose-500' };
+    case 'awaiting_approval':
+      return { label: 'Awaiting approval', dot: 'bg-amber-400', ring: 'ring-amber-400/30', rail: 'from-amber-400' };
+    case 'healing':
+      return { label: 'Healing', dot: 'bg-amber-400', ring: 'ring-amber-400/30', rail: 'from-amber-400' };
+    case 'recovered':
+      return { label: 'Recovered', dot: 'bg-emerald-500', ring: 'ring-emerald-500/30', rail: 'from-emerald-500' };
+    default:
+      return { label: 'Healthy', dot: 'bg-emerald-500', ring: 'ring-emerald-500/30', rail: 'from-emerald-500' };
+  }
+}
+
+export function ScraperMatrix({ scrapers, onRun, onHeal, onBreak, onApprove, runningId, healingId }: ScraperMatrixProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            Active Scraper Studio Collectors
-            <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">
-              {scrapers.length} collectors
-            </span>
-          </h2>
-          <p className="text-xs text-slate-400 font-mono">
-            Autonomous health monitoring and live selector diagnostics
+          <h2 className="display text-[20px] font-normal tracking-[-0.02em] text-white">Collector Fleet</h2>
+          <p className="mt-1 font-mono text-[11px] tracking-wide text-white/45">
+            Live selector diagnostics • same <span className="text-white/70">c_*</span> before and after heal
           </p>
         </div>
+        <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] text-white/60 sm:inline-flex">
+          {scrapers.length} collectors • {scrapers.filter(s => s.status === 'healthy' || s.status === 'recovered').length} healthy
+        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {scrapers.map((scraper) => {
+        {scrapers.map(scraper => {
           const isRunning = runningId === scraper.id;
           const isHealing = healingId === scraper.id;
+          const meta = statusMeta(scraper.status);
           const isBroken = scraper.status === 'broken';
-          const isRecovered = scraper.status === 'recovered';
           const isAwaiting = scraper.status === 'awaiting_approval';
-          const isHealingStatus = scraper.status === 'healing' || scraper.status === 'awaiting_approval';
-          // healthy / healing / awaiting_approval / broken / recovered handled
+          const isRecovered = scraper.status === 'recovered';
 
           return (
-            <div
-              key={scraper.id}
-              className={`glass-panel p-5 rounded-2xl border transition-all ${
-                isBroken
-                  ? 'border-rose-500/50 bg-rose-950/10 glow-rose'
-                  : isRecovered
-                  ? 'border-emerald-500/40 bg-emerald-950/10'
-                  : 'border-slate-800/80 hover:border-slate-700'
-              }`}
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                {/* Left: Metadata */}
-                <div className="space-y-2 max-w-2xl">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 font-semibold">
-                      {scraper.collectorId}
-                    </span>
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                      {scraper.category}
-                    </span>
-                    
-                    {/* Status Badge */}
-                    {isBroken ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 font-medium">
-                        <AlertCircle className="w-3 h-3 animate-pulse" />
-                        DOM Selector Broken
-                      </span>
-                    ) : isAwaiting ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-300 border border-amber-500/50 font-medium">
-                        <Wrench className="w-3 h-3 animate-pulse" />
-                        awaiting_approval — Approve Required
-                      </span>
-                    ) : isHealing ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium">
-                        <Wrench className="w-3 h-3 animate-spin" />
-                        Auto-Healing Pipeline...
-                      </span>
-                    ) : isRecovered ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-medium">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Self-Healed (Operational)
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Healthy
-                      </span>
-                    )}
-                  </div>
+            <div key={scraper.id} className="group relative overflow-hidden rounded-[18px] glass-panel p-0">
+              {/* left rail */}
+              <div className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${meta.rail} to-transparent opacity-80`} />
+              {/* brass highlight */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                  <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                    {scraper.name}
-                  </h3>
+              <div className="p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  {/* Left */}
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c9a86a]/20 bg-[#c9a86a]/10 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-[#e2d1b1]">
+                        <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} shadow-[0_0_8px_currentColor]`} />
+                        {scraper.collectorId}
+                      </span>
+                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[11px] text-white/60">
+                        {scraper.category}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] font-medium ${
+                          isBroken
+                            ? 'border-rose-500/25 bg-rose-500/10 text-rose-200'
+                            : isAwaiting
+                              ? 'border-amber-500/25 bg-amber-500/10 text-amber-200'
+                              : isRecovered
+                                ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200'
+                                : 'border-emerald-500/15 bg-emerald-500/10 text-emerald-200'
+                        }`}
+                      >
+                        {isBroken ? (
+                          <AlertCircle className="h-3 w-3" />
+                        ) : isAwaiting ? (
+                          <Wrench className="h-3 w-3 animate-pulse" />
+                        ) : isHealing ? (
+                          <Wrench className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="h-3 w-3" />
+                        )}
+                        {meta.label}
+                      </span>
+                    </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {scraper.description}
-                  </p>
+                    <div>
+                      <h3 className="text-[15px] font-semibold tracking-[-0.015em] text-white">{scraper.name}</h3>
+                      <p className="mt-1 max-w-3xl text-[13px] leading-5 text-white/55">{scraper.description}</p>
+                    </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-1">
-                    <span className="flex items-center gap-1">
-                      <Globe className="w-3 h-3 text-slate-500" />
+                    <div className="flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-3 font-mono text-[11px] text-white/45">
                       <a
                         href={scraper.targetUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="hover:text-cyan-400 underline underline-offset-2 flex items-center gap-0.5"
+                        className="inline-flex items-center gap-1 text-cyan-300/90 hover:text-cyan-200"
                       >
-                        {scraper.targetUrl}
-                        <ArrowUpRight className="w-2.5 h-2.5" />
+                        <Globe className="h-3 w-3" />
+                        {scraper.targetUrl.replace('https://', '')}
+                        <ArrowUpRight className="h-3 w-3 opacity-60" />
                       </a>
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-slate-500" />
-                      Runs: <strong className="text-slate-200">{scraper.totalRuns}</strong> (
-                      {scraper.successRate}% success)
-                    </span>
-                    {scraper.totalHeals > 0 && (
-                      <span className="text-amber-400 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
-                        Repairs: {scraper.totalHeals}
+                      <span className="hidden h-3 w-px bg-white/10 sm:block" />
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className="h-3 w-3 text-white/30" />
+                        Runs <strong className="font-semibold text-white">{scraper.totalRuns}</strong>
+                        <span className="text-white/30">•</span>
+                        <span className="text-emerald-300">{scraper.successRate}% success</span>
                       </span>
-                    )}
+                      {scraper.totalHeals > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[#c9a86a]/20 bg-[#c9a86a]/10 px-2 py-0.5 text-[#e2d1b1]">
+                          <Sparkles className="h-3 w-3 text-[#c9a86a]" />
+                          {scraper.totalHeals} repairs
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Right: Actions */}
-                <div className="flex flex-wrap lg:flex-col items-center lg:items-end justify-start gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
-                  <div className="flex items-center gap-2">
+                  {/* Right — actions */}
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-col lg:items-stretch">
                     <button
                       onClick={() => onRun(scraper.id)}
-                      disabled={isRunning || isHealing}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-mono transition-all disabled:opacity-50 cursor-pointer border border-slate-700"
+                      disabled={isRunning || !!isHealing}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3.5 py-2 text-xs font-medium text-white backdrop-blur transition hover:bg-white/[0.08] disabled:opacity-50 cursor-pointer"
                     >
-                      <Play className={`w-3.5 h-3.5 text-emerald-400 ${isRunning ? 'animate-spin' : ''}`} />
-                      <span>{isRunning ? 'Running Collector...' : 'Run Scraper'}</span>
+                      <Play className={`h-3.5 w-3.5 ${isRunning ? 'animate-pulse text-emerald-300' : 'text-white/70'}`} />
+                      {isRunning ? 'Running…' : 'Run'}
                     </button>
 
                     {isAwaiting && onApprove ? (
                       <button
                         onClick={() => onApprove(scraper.id)}
-                        disabled={isHealing}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-lg"
+                        disabled={!!isHealing}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-400 px-4 py-2 text-xs font-semibold text-black shadow-[0_8px_24px_-12px_rgba(251,191,36,0.6)] transition hover:bg-amber-300 disabled:opacity-50 cursor-pointer"
                       >
-                        <Wrench className={`w-3.5 h-3.5 ${isHealing ? 'animate-spin' : ''}`} />
-                        <span>Approve Heal</span>
+                        <ShieldAlert className="h-3.5 w-3.5" />
+                        Approve
                       </button>
                     ) : isBroken ? (
                       <button
-                        onClick={() => onHeal(scraper.id) /* heal → awaiting_approval → approve */}
-                        disabled={isHealing}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-emerald-950/50 glow-emerald"
+                        onClick={() => onHeal(scraper.id)}
+                        disabled={!!isHealing}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#070c1a] shadow-[0_8px_24px_-12px_rgba(255,255,255,0.5)] transition hover:bg-white/90 disabled:opacity-50 cursor-pointer"
                       >
-                        <Sparkles className={`w-3.5 h-3.5 ${isHealing ? 'animate-spin' : ''}`} />
-                        <span>{isHealing ? 'Healing with AI...' : 'Self-Heal Now'}</span>
+                        <Sparkles className="h-3.5 w-3.5" />
+                        {isHealing ? 'Healing…' : 'Self-Heal'}
                       </button>
                     ) : (
                       scraper.isDemoBreakable && (
                         <button
                           onClick={() => onBreak(scraper.id)}
-                          className="flex items-center gap-1 px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-mono border border-rose-800/60 transition-all cursor-pointer"
-                          title="Simulate a website layout redesign breaking this scraper"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-200 transition hover:bg-rose-500/15 cursor-pointer"
                         >
-                          <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
-                          <span>Break DOM (Demo)</span>
+                          <ShieldAlert className="h-3.5 w-3.5" />
+                          Break
                         </button>
                       )
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* Selectors Pill Tray */}
-              <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-mono text-slate-400">Schema Selectors:</span>
-                {scraper.selectors.map((sel) => (
-                  <span
-                    key={sel.field}
-                    className={`inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-md border ${
-                      sel.status === 'broken'
-                        ? 'bg-rose-950/60 text-rose-300 border-rose-800/80 font-bold'
-                        : sel.status === 'repaired'
-                        ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/80'
-                        : 'bg-slate-900 text-slate-300 border-slate-800'
-                    }`}
-                  >
-                    <span className="text-slate-400">{sel.field}:</span>
-                    <code className="text-cyan-300">{sel.selector}</code>
-                    {sel.status === 'broken' && <span className="text-rose-400">❌</span>}
-                    {sel.status === 'repaired' && <span className="text-emerald-400">✨</span>}
-                  </span>
-                ))}
+                {/* Selector chips — code-like */}
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-3">
+                  <span className="font-mono text-[10px] font-semibold tracking-[0.12em] text-white/30">SELECTORS</span>
+                  {scraper.selectors.map(sel => (
+                    <span
+                      key={sel.field}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] ${
+                        sel.status === 'broken'
+                          ? 'border-rose-500/25 bg-rose-500/10 text-rose-200'
+                          : sel.status === 'repaired'
+                            ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-200'
+                            : 'border-white/10 bg-white/[0.04] text-white/70'
+                      }`}
+                    >
+                      <span className="text-white/40">{sel.field}</span>
+                      <span className="text-white/15">·</span>
+                      <code className="text-[11px] tracking-tight">{sel.selector}</code>
+                      {sel.status === 'broken' && <span className="ml-1 text-[10px]">✕</span>}
+                      {sel.status === 'repaired' && <span className="ml-1 text-[10px]">✦</span>}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           );

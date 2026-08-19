@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, Activity, Terminal, Sparkles, RefreshCw, Cpu, Layers, Radio } from 'lucide-react';
+import { ShieldCheck, Sparkles, RefreshCw, Cpu, Layers, Radio } from 'lucide-react';
 import { BudgetInfo } from '@/src/lib/types';
 
 interface HeaderProps {
@@ -17,70 +17,97 @@ export function Header({ onRefresh, isRefreshing, onOpenDemo, budget }: HeaderPr
   const isLive = budget?.isLive ?? false;
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        {/* Brand & Identity */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/20 via-cyan-500/20 to-indigo-500/20 border border-emerald-500/40 glow-emerald">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#030815]/75 backdrop-blur-xl">
+      {/* brass top hairline */}
+      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#c9a86a]/30 to-transparent" />
+      <div className="mx-auto flex max-w-[1360px] flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between lg:px-6">
+        {/* Brand */}
+        <div className="flex items-center gap-3.5">
+          <div className="relative grid h-[44px] w-[44px] place-items-center rounded-2xl bg-gradient-to-br from-[#0e1a30] to-[#0a1122] ring-1 ring-white/10">
+            {/* inner brass ring */}
+            <div className="absolute inset-[1px] rounded-2xl ring-1 ring-[#c9a86a]/20" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.08] to-transparent" />
+            <ShieldCheck className="relative h-5 w-5 text-[#c9a86a]" strokeWidth={1.75} />
+            {/* live dot */}
+            <span className="absolute -right-1 -top-1 grid h-[13px] w-[13px] place-items-center">
+              <span className="absolute h-full w-full rounded-full bg-emerald-500/20 animate-pulse-ring" />
+              <span className="relative h-[9px] w-[9px] rounded-full bg-emerald-500 ring-2 ring-[#030815] shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
             </span>
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            <div className="flex items-baseline gap-2.5">
+              <h1 className="display text-[22px] font-normal tracking-[-0.03em] text-white">
                 AegisScrape
-                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  v1.0.0
-                </span>
               </h1>
+              <span className="hidden sm:inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium tracking-widest text-white/60">
+                OBSERVABILITY • v1.0
+              </span>
             </div>
-            <p className="text-xs text-slate-400 font-mono flex items-center gap-1.5 mt-0.5">
-              <Sparkles className="w-3 h-3 text-cyan-400" />
-              Autonomous Self-Healing Observability Engine // Bright Data Scraper Studio
+            <p className="mt-0.5 flex items-center gap-1.5 text-[11px] tracking-wide text-white/55">
+              <span className="h-px w-6 bg-gradient-to-r from-[#c9a86a]/50 to-transparent" />
+              <Sparkles className="h-3 w-3 text-[#c9a86a]/70" />
+              <span className="font-mono text-white/45">Autonomous Self-Healing</span>
+              <span className="text-white/20">•</span>
+              <span className="font-mono">Bright Data Scraper Studio</span>
             </p>
           </div>
         </div>
 
-        {/* Live Network Status & Actions */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border ${
-            isLive
-              ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-300'
-              : 'bg-indigo-950/60 border-indigo-800/80 text-indigo-300'
-          }`}>
-            <Radio className={`w-3 h-3 ${isLive ? 'text-emerald-400 animate-pulse' : 'text-indigo-400'}`} />
-            <span>{isLive ? 'LIVE BRIGHT DATA API' : 'SIMULATION ENGINE'}</span>
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div
+            className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium tracking-wide sm:flex ${
+              isLive
+                ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200'
+                : 'border-white/10 bg-white/[0.04] text-white/60'
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${isLive ? 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse' : 'bg-white/30'}`}
+            />
+            <Radio className={`h-3 w-3 ${isLive ? 'text-emerald-300' : 'text-white/40'}`} />
+            <span className="font-mono">{isLive ? 'LIVE API' : 'SIMULATION'}</span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
-            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Proxy Pool: <strong className="text-emerald-400">Residential ({proxies} Active)</strong></span>
+          <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 backdrop-blur sm:flex">
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-cyan-500/10 ring-1 ring-cyan-500/20">
+              <Cpu className="h-3.5 w-3.5 text-cyan-300" />
+            </span>
+            <span className="font-mono text-[11px] text-white/50">Proxy Pool</span>
+            <strong className="text-[12px] font-semibold tracking-tight text-white">
+              {proxies} Residential
+            </strong>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
-            <Layers className="w-3.5 h-3.5 text-amber-400" />
-            <span>Credits: <strong className="text-amber-400">{credits.toLocaleString()} left</strong> ($50 Bonus)</span>
+          <div className="flex items-center gap-2 rounded-full border border-[#c9a86a]/15 bg-[#c9a86a]/10 px-3 py-1.5 text-xs backdrop-blur">
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-[#c9a86a]/15 ring-1 ring-[#c9a86a]/20">
+              <Layers className="h-3.5 w-3.5 text-[#c9a86a]" />
+            </span>
+            <span className="hidden font-mono text-[11px] text-white/50 sm:inline">Credits</span>
+            <strong className="font-mono text-[12px] font-semibold tracking-tight text-[#e2d1b1]">
+              {credits.toLocaleString()}
+            </strong>
+            <span className="hidden text-[11px] font-medium text-[#c9a86a]/70 sm:inline">+ $50 bonus</span>
           </div>
 
           <button
             onClick={onOpenDemo}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-rose-600/80 to-amber-600/80 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-semibold shadow-lg shadow-rose-950/40 border border-rose-400/30 transition-all cursor-pointer"
+            className="group inline-flex items-center gap-2 rounded-full bg-white px-[14px] py-[8px] text-[12px] font-semibold tracking-tight text-[#070c1a] shadow-[0_8px_24px_-12px_rgba(255,255,255,0.5)] ring-1 ring-white/10 transition hover:bg-white/90 cursor-pointer"
           >
-            <Activity className="w-3.5 h-3.5 animate-pulse" />
-            <span>Judge Demo Playground</span>
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-[#070c1a] text-white">
+              <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+            </span>
+            Judge Demo
           </button>
 
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/70 backdrop-blur transition hover:bg-white/[0.06] hover:text-white disabled:opacity-50 cursor-pointer"
             title="Refresh Telemetry"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-[#c9a86a]' : ''}`} />
           </button>
         </div>
       </div>
