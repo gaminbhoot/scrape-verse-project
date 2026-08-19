@@ -1,4 +1,5 @@
-export type ScraperStatus = 'healthy' | 'healing' | 'awaiting_approval' | 'degraded' | 'broken' | 'recovered';
+export type ScraperStatus =
+  'healthy' | 'healing' | 'awaiting_approval' | 'degraded' | 'broken' | 'recovered';
 
 export interface SelectorMap {
   field: string;
@@ -48,7 +49,12 @@ export interface HealEvent {
   timestamp: string;
   triggerReason: string;
   brokenSelectors: string[];
-  repairedSelectors: { field: string; oldSelector: string; newSelector: string; strategy: string }[];
+  repairedSelectors: {
+    field: string;
+    oldSelector: string;
+    newSelector: string;
+    strategy: string;
+  }[];
   confidenceScore: number;
   timeToHealMs: number;
   cliCommandUsed: string;
@@ -81,4 +87,3 @@ export interface BudgetInfo {
   activeProxies: number;
   isLive?: boolean;
 }
-

@@ -10,11 +10,11 @@
 
 All data collectors in AegisScrape operate exclusively against long-tail, unauthenticated, public web resources that are **not** covered by pre-built marketplace scrapers (e.g. Amazon, LinkedIn, Walmart):
 
-| Collector ID | Target URL | Domain | Category | Data Fields Harvested | Public Access Verified |
-| :--- | :--- | :--- | :--- | :--- | :---: |
-| `c_layoffs_v2_hackathon` | `https://layoffs.fyi/live-data` | `layoffs.fyi` | Tech Workforce | `company`, `count`, `role`, `date` | ✅ Incognito / Unauthenticated |
-| `c_llm_benchmarks_live` | `https://huggingface.co/spaces/open-llm-leaderboard` | `huggingface.co` | AI Benchmarks | `modelName`, `params`, `mmluScore`, `license` | ✅ Open Source Research Space |
-| `c_ai_jobs_stream` | `https://news.ycombinator.com/jobs` | `news.ycombinator.com` | AI Job Market | `item`, `company`, `location`, `salary` | ✅ Public Job Board Listing |
+| Collector ID             | Target URL                                           | Domain                 | Category       | Data Fields Harvested                         |     Public Access Verified     |
+| :----------------------- | :--------------------------------------------------- | :--------------------- | :------------- | :-------------------------------------------- | :----------------------------: |
+| `c_layoffs_v2_hackathon` | `https://layoffs.fyi/live-data`                      | `layoffs.fyi`          | Tech Workforce | `company`, `count`, `role`, `date`            | ✅ Incognito / Unauthenticated |
+| `c_llm_benchmarks_live`  | `https://huggingface.co/spaces/open-llm-leaderboard` | `huggingface.co`       | AI Benchmarks  | `modelName`, `params`, `mmluScore`, `license` | ✅ Open Source Research Space  |
+| `c_ai_jobs_stream`       | `https://news.ycombinator.com/jobs`                  | `news.ycombinator.com` | AI Job Market  | `item`, `company`, `location`, `salary`       |  ✅ Public Job Board Listing   |
 
 ---
 
@@ -67,18 +67,19 @@ AegisScrape certifies that **zero PII is harvested, stored, or processed**:
 AegisScrape is architected to operate efficiently within the hackathon resource allocation:
 
 ### Official Credit Allocation
+
 - **Bright Data Monthly Free Tier:** **5,000 credits / month** (No credit card required).
 - **WeMakeDevs Hackathon Promo Code:** `wemakedevs` (Unlocks an additional **+$50 credit grant** in Bright Data billing).
 - **Total Effective Team Capacity (4 members):** ~20,000+ credits / $200 effective balance.
 
 ### Scrape & Self-Healing Unit Economics
 
-| Operation | Infrastructure Utilized | Cost per Execution | Free Tier Capacity |
-| :--- | :--- | :---: | :---: |
-| **Collector Heartbeat Check** | REST `POST /dca/trigger` | ~0.5 – 1.0 Credits | **5,000 – 10,000 checks** |
-| **Full Page Scrape & Validation** | Bright Data Residential Proxies + Web Unlocker | ~2.0 – 5.0 Credits | **1,000 – 2,500 runs** |
-| **Autonomous Self-Heal (`bdata scraper heal`)** | Bright Data AI DOM Parser & Heuristics | ~5.0 – 10.0 Credits | **500 – 1,000 healing events** |
-| **Human-in-the-Loop Approve** | `@brightdata/cli bdata scraper approve` | 0 Credits (Local Config Mutation) | **Unlimited** |
+| Operation                                       | Infrastructure Utilized                        |        Cost per Execution         |       Free Tier Capacity       |
+| :---------------------------------------------- | :--------------------------------------------- | :-------------------------------: | :----------------------------: |
+| **Collector Heartbeat Check**                   | REST `POST /dca/trigger`                       |        ~0.5 – 1.0 Credits         |   **5,000 – 10,000 checks**    |
+| **Full Page Scrape & Validation**               | Bright Data Residential Proxies + Web Unlocker |        ~2.0 – 5.0 Credits         |     **1,000 – 2,500 runs**     |
+| **Autonomous Self-Heal (`bdata scraper heal`)** | Bright Data AI DOM Parser & Heuristics         |        ~5.0 – 10.0 Credits        | **500 – 1,000 healing events** |
+| **Human-in-the-Loop Approve**                   | `@brightdata/cli bdata scraper approve`        | 0 Credits (Local Config Mutation) |         **Unlimited**          |
 
 ---
 

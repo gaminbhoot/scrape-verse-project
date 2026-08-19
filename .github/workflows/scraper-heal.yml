@@ -10,10 +10,15 @@ on:
         required: false
         default: 'c_layoffs_v2_hackathon'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   scrape-and-heal:
     name: Scrape Heartbeat & Auto-Heal (heal → approve)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Code
@@ -28,46 +33,83 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Budget guard — check credits before burning
+        env:
+          BRIGHT_DATA_API_KEY: ${{ secrets.BRIGHT_DATA_API_KEY }}
+        run: |
+          echo "Checking Bright Data budget..."
+          npx @brightdata/cli bdata budget --format json || echo "⚠️ budget check failed — continuing in simulation / will not charge"
+          # Do not fail on 402 here — heartbeat handles it per R7
+
       - name: Authenticate Bright Data CLI
         env:
           BRIGHT_DATA_API_KEY: ${{ secrets.BRIGHT_DATA_API_KEY }}
         run: |
           echo "Authenticating with Bright Data Collector Infrastructure..."
-          npx @brightdata/cli bdata login --token "$BRIGHT_DATA_API_KEY" || echo "Running in CI simulation mode"
+          if [ -n "$BRIGHT_DATA_API_KEY" ]; then
+            npx @brightdata/cli bdata login --token "$BRIGHT_DATA_API_KEY" || echo "Login failed — running in simulation"
+          else
+            echo "No BRIGHT_DATA_API_KEY in secrets — running heartbeat in simulation mode (ALLOW_MOCK_FALLBACK=true)"
+          fi
 
-      - name: Run Collector Heartbeat Check
+      - name: Run Collector Heartbeat Check (REST→CLI, validates per-collector)
         id: collector_run
         env:
           COLLECTOR_ID: ${{ inputs.collector_id || 'c_layoffs_v2_hackathon' }}
+          BRIGHT_DATA_API_KEY: ${{ secrets.BRIGHT_DATA_API_KEY }}
+          BRIGHT_DATA_USE_REST: 'false'
+          ALLOW_MOCK_FALLBACK: 'true'
         run: |
           echo "Executing Collector heartbeat for $COLLECTOR_ID..."
-          node scripts/heartbeat.mjs || echo "HEAL_TRIGGERED=true" >> $GITHUB_ENV
+          # heartbeat exits 1 = healable (empty/drift) → triggers heal
+          # exits 0 = healthy or transient infra (429/5xx/402) → no heal per R1/R4/R7
+          set +e
+          node scripts/heartbeat.mjs
+          HB_EXIT=$?
+          echo "heartbeat exit code: $HB_EXIT"
+          if [ "$HB_EXIT" -eq 1 ]; then
+            echo "HEAL_TRIGGERED=true" >> $GITHUB_ENV
+            echo "heal_triggered=true" >> $GITHUB_OUTPUT
+            echo "⛑️ Healable failure detected — will trigger heal→approve"
+          elif [ "$HB_EXIT" -eq 0 ]; then
+            echo "HEAL_TRIGGERED=false" >> $GITHUB_ENV
+            echo "✅ Healthy or transient infra — no heal needed (per R1/R4/R7 guardrails)"
+          else
+            echo "HEAL_TRIGGERED=false" >> $GITHUB_ENV
+            echo "❌ Unexpected heartbeat exit $HB_EXIT — not healing"
+            exit $HB_EXIT
+          fi
+          set -e
 
-      - name: Execute Autonomous Self-Healing & Verification (if broken)
+      - name: Execute Autonomous Self-Healing & Verification (if healable)
         if: env.HEAL_TRIGGERED == 'true'
         env:
           COLLECTOR_ID: ${{ inputs.collector_id || 'c_layoffs_v2_hackathon' }}
+          BRIGHT_DATA_API_KEY: ${{ secrets.BRIGHT_DATA_API_KEY }}
         run: |
           echo "⚠️ DOM Mismatch / Selector Breakdown detected for $COLLECTOR_ID!"
           echo "Initiating AI Self-Healing via Bright Data CLI..."
-          npx @brightdata/cli bdata scraper heal "$COLLECTOR_ID" "Automated CI/CD detection: Target DOM classes shifted" --format json
+          npx @brightdata/cli bdata scraper heal "$COLLECTOR_ID" "Automated CI/CD detection: Target DOM classes shifted — validated nullRate >30% or empty payload" --format json
           echo "Heal completed — status=awaiting_approval — now approving"
           npx @brightdata/cli bdata scraper approve "$COLLECTOR_ID" --auto-approve
-          echo "Executing post-heal verification..."
-          node scripts/validate.mjs
+          echo "Executing post-heal verification (per-collector)..."
+          node scripts/validate.mjs --collector "$COLLECTOR_ID"
+          echo "Re-running heartbeat to confirm recovery..."
+          node scripts/heartbeat.mjs
 
       - name: Create Pull Request with Healed Selectors
         if: env.HEAL_TRIGGERED == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "fix(collector): autonomous self-healed selectors via Bright Data CLI (heal → approve)"
+          commit-message: 'fix(collector): autonomous self-healed selectors via Bright Data CLI (heal → approve)'
           title: "🤖 [AegisScrape Auto-Heal] Repaired Collector Selectors (${{ inputs.collector_id || 'c_layoffs_v2_hackathon' }})"
           body: |
             ## Autonomous Self-Healing Summary
             - **Collector**: `${{ inputs.collector_id || 'c_layoffs_v2_hackathon' }}`
-            - **Trigger**: Automated Cron Heartbeat detected DOM schema mismatch.
-            - **Action Taken**: Ran `bdata scraper heal` → `bdata scraper approve --auto-approve` and regenerated resilient selector mappings.
-            - **Verification**: `scripts/validate.mjs` passed with 0% anomaly rate.
+            - **Trigger**: Heartbeat `validate.mjs` detected healable failure (nullRate >30% or empty payload). Transient 5xx/429/402 do NOT trigger heal per R1/R4/R7 guardrails.
+            - **Action Taken**: Ran `bdata scraper heal` → `bdata scraper approve --auto-approve` and regenerated resilient selector mappings. Same `c_*` mutated, downstream untouched.
+            - **Verification**: `scripts/validate.mjs --collector <id>` passed + heartbeat re-ran healthy. `data/latest-run-<id>.json` snapshot updated.
+            - **Logs**: See `Actions` run and `data/latest-run-*.json` artifacts.
           branch: auto-heal/collector-update
-
+          delete-branch: true

@@ -4,32 +4,41 @@
   "private": true,
   "description": "Autonomous Self-Healing Web Scraping Engine & Visual Observability Platform for Bright Data Scraper Studio",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:strict": "next lint --max-warnings 0",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
     "test": "node --test tests/**/*.test.js"
   },
   "dependencies": {
+    "@brightdata/cli": "^0.3.5",
+    "better-sqlite3": "^9.2.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.2",
-    "zod": "^3.24.2",
-    "@brightdata/cli": "^1.0.0",
-    "better-sqlite3": "^9.2.2"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.23",
     "postcss": "^8.4.49",
+    "prettier": "^3.9.6",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2",
-    "@types/better-sqlite3": "^7.6.8"
+    "typescript": "^5.7.2"
   }
 }

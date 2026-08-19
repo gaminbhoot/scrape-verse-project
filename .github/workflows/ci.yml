@@ -1,9 +1,9 @@
 name: Continuous Integration & Verification
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -23,8 +23,36 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Test Suite
+      - name: Lint (ESLint + Next)
+        run: npm run lint
+
+      - name: Prettier — check formatting
+        run: npm run format
+
+      - name: Secret scan — ensure no BRIGHTDATA_TOKEN or Collector ID in git
+        run: |
+          echo "Scanning git history for leaked secrets..."
+          if git log --all -p | grep -Eq "brd_[A-Za-z0-9]{10,}|Bearer brd_" ; then
+            echo "❌ Potential leaked Bright Data token found in git history"
+            exit 1
+          fi
+          echo "✅ No leaked tokens found"
+          cat .gitignore | grep -q "^\.env$" && echo "✅ .env gitignored" || (echo "❌ .env not in .gitignore" && exit 1)
+
+      - name: Run Test Suite (104 harsh tests)
         run: npm test
 
-      - name: Run Schema Validator
-        run: node scripts/validate.mjs
+      - name: Build — ensure no native bundling regression
+        run: npm run build
+
+      - name: Schema Validator — smoke test (default + per-collector)
+        run: |
+          node scripts/validate.mjs
+          node scripts/validate.mjs --collector c_layoffs_v2_hackathon
+          node scripts/validate.mjs --collector c_llm_benchmarks_live
+          node scripts/validate.mjs --collector c_ai_jobs_stream
+
+      - name: Heartbeat — dry-run (simulation mode, no key)
+        env:
+          ALLOW_MOCK_FALLBACK: 'true'
+        run: node scripts/heartbeat.mjs

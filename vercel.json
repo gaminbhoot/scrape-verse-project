@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
+  "crons": [
+    {
+      "path": "/api/cron/heartbeat",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "functions": {
+    "app/api/cron/heartbeat/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "ALLOW_MOCK_FALLBACK": "true"
+  }
+}

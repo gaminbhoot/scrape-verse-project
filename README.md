@@ -3,10 +3,10 @@
 > **Autonomous Self-Healing Web Scraping Engine & Visual Observability Platform**  
 > Built for the **"Into the Scrape-Verse"** Hackathon by **WeMakeDevs** & **Bright Data**.
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)]()
-[![Bright Data CLI](https://img.shields.io/badge/Bright%20Data-Scraper%20Studio-blue.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](<>)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](<>)
+[![Bright Data CLI](https://img.shields.io/badge/Bright%20Data-Scraper%20Studio-blue.svg)](<>)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](<>)
 
 ---
 
@@ -20,12 +20,12 @@ Web scrapers are notoriously fragile—minor DOM modifications, class renaming, 
 
 ## 🏆 Target Hackathon Tracks
 
-| Track | Category | How AegisScrape Competes |
-| :--- | :--- | :--- |
-| **Web-Slinger Track** | **Grand Prize (Best Use of Bright Data)** | Deep integration with Bright Data Scraper Studio & `@brightdata/cli` (`bdata scraper run`, `bdata scraper heal`, `bdata budget`), featuring automated CLI recovery loops and Collector ID telemetry. |
-| **Suit-Up Track** | **Best UI** | Sleek Cyberpunk/Dark-Mode Observability Control Center with real-time health telemetry, live CLI stream, interactive judge demo breaker, and visual DOM diff inspector. |
-| **Spider-Sense Track** | **Best Clean Code** | Strict TypeScript architecture, modular separation of concerns (Runner, Healer, Store, API), full documentation, automated GitHub Actions CI/CD, and test suite. |
-| **The Daily Bugle Track** | **Social & Community** | Complete write-ups, architecture specs, video demonstration script, and LinkedIn/DEV.to showcase. |
+| Track                     | Category                                  | How AegisScrape Competes                                                                                                                                                                             |
+| :------------------------ | :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Web-Slinger Track**     | **Grand Prize (Best Use of Bright Data)** | Deep integration with Bright Data Scraper Studio & `@brightdata/cli` (`bdata scraper run`, `bdata scraper heal`, `bdata budget`), featuring automated CLI recovery loops and Collector ID telemetry. |
+| **Suit-Up Track**         | **Best UI**                               | Sleek Cyberpunk/Dark-Mode Observability Control Center with real-time health telemetry, live CLI stream, interactive judge demo breaker, and visual DOM diff inspector.                              |
+| **Spider-Sense Track**    | **Best Clean Code**                       | Strict TypeScript architecture, modular separation of concerns (Runner, Healer, Store, API), full documentation, automated GitHub Actions CI/CD, and test suite.                                     |
+| **The Daily Bugle Track** | **Social & Community**                    | Complete write-ups, architecture specs, video demonstration script, and LinkedIn/DEV.to showcase.                                                                                                    |
 
 ---
 
@@ -50,7 +50,6 @@ graph TD
 
 > **Collector-as-API:** `POST https://api.brightdata.com/dca/trigger?collector=c_xxx` with `Authorization: Bearer $BRIGHT_DATA_API_KEY` — see `src/lib/brightdata.ts:triggerViaRest`. CLI `bdata scraper run/heal/approve` is fallback. Respects `robots.txt`, public data only, turns websites into structured data.
 
-
 1. **Autonomous Self-Healing (`bdata scraper heal`)**:
    - Detects layout shifts, obsolete CSS classes, and missing schema fields.
    - Automatically executes Bright Data healing heuristics to generate resilient semantic selectors.
@@ -73,10 +72,12 @@ graph TD
 ## 🚀 Quickstart
 
 ### Prerequisites
+
 - Node.js 18+ (tested on Node.js 22/26)
 - npm or yarn
 
 ### 1. Clone & Install
+
 ```bash
 git clone https://github.com/<your-username>/scrape-verse-project.git
 cd scrape-verse-project
@@ -84,18 +85,23 @@ npm install
 ```
 
 ### 2. Configure Environment (Optional)
+
 Create `.env.local` to add your Bright Data credentials (or run in built-in mock/simulation mode):
+
 ```bash
 BRIGHT_DATA_API_KEY="your_bright_data_api_token"
 ```
 
 ### 3. Run Development Server
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 4. Run Tests
+
 ```bash
 npm test
 ```
@@ -126,6 +132,7 @@ npx @brightdata/cli bdata scraper heal <collector_id> "<reason for break>"
 ## 📂 Project Documentation & Compliance
 
 Detailed specifications, compliance certs, and planning documents:
+
 - [Compliance, Zero-PII & Credit Economics](file:///Users/jay/Documents/Projects/scrape-verse-project/COMPLIANCE.md)
 - [Project Charter](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/PROJECT_CHARTER.md)
 - [Product Requirements Document (PRD)](file:///Users/jay/Documents/Projects/scrape-verse-project/docs/PRD.md)
@@ -146,15 +153,15 @@ Prebuilt scrapers in commercial marketplaces only cover the top 0.01% of standar
 
 ## 🛡️ Risk Register & Self-Healing Guardrails (§27)
 
-| Risk ID | Failure Scenario | Impact | Autonomous Mitigation & Guardrail |
-| :--- | :--- | :--- | :--- |
-| **R1** | **Target Site Transient 5xx Downtime** | Heartbeat fails | **Guardrail:** Do NOT trigger heal on 5xx; retry with exponential backoff. |
-| **R2** | **Obfuscated / Hashed Tailwind CSS Classes** | Selectors break | AI Healer synthesizes semantic tag & `data-testid` fallback selector chains. |
-| **R3** | **Full Page Redesign (Table ➔ Flex Grid)** | Zero rows extracted | Structural relative path healing with partial salvage fallback. |
-| **R4** | **Target Rate Limiting (HTTP 429)** | Scraper throttled | Residential proxy rotation + automatic backoff with jitter. |
-| **R5** | **Over-Healing on Minor Layout Jitter** | Flaky updates | `confidenceScore > 0.80` threshold required before proposed diff approval. |
-| **R6** | **Silent Schema / Type Mutation** | Bad data ingested | Zod live schema validator rejects mutated types and logs anomaly. |
-| **R7** | **Credit Exhaustion (HTTP 402)** | Collector halts | Budget API alerts dashboard and fails fast with actionable prompt. |
+| Risk ID | Failure Scenario                             | Impact              | Autonomous Mitigation & Guardrail                                            |
+| :------ | :------------------------------------------- | :------------------ | :--------------------------------------------------------------------------- |
+| **R1**  | **Target Site Transient 5xx Downtime**       | Heartbeat fails     | **Guardrail:** Do NOT trigger heal on 5xx; retry with exponential backoff.   |
+| **R2**  | **Obfuscated / Hashed Tailwind CSS Classes** | Selectors break     | AI Healer synthesizes semantic tag & `data-testid` fallback selector chains. |
+| **R3**  | **Full Page Redesign (Table ➔ Flex Grid)**   | Zero rows extracted | Structural relative path healing with partial salvage fallback.              |
+| **R4**  | **Target Rate Limiting (HTTP 429)**          | Scraper throttled   | Residential proxy rotation + automatic backoff with jitter.                  |
+| **R5**  | **Over-Healing on Minor Layout Jitter**      | Flaky updates       | `confidenceScore > 0.80` threshold required before proposed diff approval.   |
+| **R6**  | **Silent Schema / Type Mutation**            | Bad data ingested   | Zod live schema validator rejects mutated types and logs anomaly.            |
+| **R7**  | **Credit Exhaustion (HTTP 402)**             | Collector halts     | Budget API alerts dashboard and fails fast with actionable prompt.           |
 
 ---
 
@@ -167,4 +174,5 @@ Prebuilt scrapers in commercial marketplaces only cover the top 0.01% of standar
 ---
 
 ## 📜 License
+
 MIT License. Built with ❤️ for WeMakeDevs & Bright Data.
