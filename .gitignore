@@ -41,3 +41,7 @@ data/*.db-wal
 *.db-journal
 *.db-wal
 
+
+# heartbeat snapshots — runtime, not source
+data/latest-run*.json
+data/*.json
